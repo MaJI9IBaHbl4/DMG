@@ -1,0 +1,5 @@
+Yra moduliu standartas kaip yra atliekamas modeliu fotogramavimas savarankiskai
+Reikia:
+	Pasidometi standartu
+	Surasti praktikas
+

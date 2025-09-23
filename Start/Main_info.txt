@@ -1,0 +1,1054 @@
+===============================================================================
+###############################################################################
+╔══════════════════════════════╗
+║╔════════════════════════════╗║
+║║ START - Модель данных (v1) ║║
+║╚════════════════════════════╝║
+╚══════════════════════════════╝
+╔═══════════════════════════╗
+║ 1) Пользователи и профиль ║
+╚═══════════════════════════╝
+┌───────┐
+│ users │
+└───────┘
+  id uniqueidentifier PK
+  email nvarchar(256) NOT NULL, UNIQUE
+  name nvarchar(128) NULL
+  role varchar(20) NOT NULL DEFAULT 'user' — user|moderator|admin
+  status varchar(20) NOT NULL DEFAULT 'active' — active|blocked|deleted
+  created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+  row_version rowversion (EF Concurrency)
+  
+Индексы: 
+  UX_users_email
+
+
+┌───────────────────────┐
+│ avatars (1:1 с users) │
+└───────────────────────┘  user_id uniqueidentifier PK, FK → users.id ON DELETE CASCADE
+  height_cm int NOT NULL
+  weight_kg int NOT NULL
+  chest_cm / waist_cm / hips_cm / foot_cm int NULL
+  px_per_mm decimal(9,6) NULL — калибровка по A4/карте
+  updated_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+
+===============================================================================
+╔══════════════════════════════════╗
+║ 2) Справочники (нормализованные) ║
+╚══════════════════════════════════╝
+┌────────┐
+│ brands │
+└────────┘
+  id int IDENTITY PK
+  name nvarchar(128) UNIQUE NOT NULL
+
+
+┌────────────┐
+│ categories │
+└────────────┘
+  id int IDENTITY PK
+  code varchar(32) UNIQUE NOT NULL — top|bottom|dress|outer|shoes|accessory
+  name nvarchar(64) NOT NULL
+
+
+┌────────────┐
+│ conditions │
+└────────────┘
+  id int IDENTITY PK
+  code varchar(16) UNIQUE NOT NULL — new|like_new|good|used
+  name nvarchar(64) NOT NULL
+
+
+┌──────┐
+│ fits │
+└──────┘
+  id int IDENTITY PK
+  code varchar(16) UNIQUE NOT NULL — slim|regular|oversized
+  name nvarchar(64) NOT NULL
+
+
+┌────────┐
+│ colors │
+└────────┘
+  id int IDENTITY PK
+  name nvarchar(32) NOT NULL
+  hex char(7) NOT NULL — #RRGGBB
+  l float NULL, a float NULL, b float NULL — (LAB для похожести)
+
+
+┌──────────┐
+│ patterns │
+└──────────┘
+  id int IDENTITY PK
+  name nvarchar(32) UNIQUE NOT NULL — solid|striped|checked|…
+
+
+┌───────────┐
+│ materials │
+└───────────┘
+  id int IDENTITY PK
+  name nvarchar(32) UNIQUE NOT NULL — cotton|denim|knit|…
+
+
+┌─────────┐
+│ seasons │
+└─────────┘
+  code varchar(16) PK — spring|summer|autumn|winter|all_year
+  name nvarchar(32) NOT NULL
+
+
+===============================================================================
+╔════════════════════╗
+║ 3) Вещи (гардероб) ║
+╚════════════════════╝
+┌──────────┐
+│ garments │
+└──────────┘
+  id uniqueidentifier PK
+  owner_id uniqueidentifier NOT NULL, FK → users.id ON DELETE CASCADE
+  title nvarchar(160) NOT NULL
+  brand_id int NULL, FK → brands.id
+  category_id int NOT NULL, FK → categories.id
+  size nvarchar(32) NULL
+  fit_id int NULL, FK → fits.id
+  condition_id int NULL, FK → conditions.id
+  is_for_sale bit NOT NULL DEFAULT 0
+  price_cents int NULL
+  currency char(3) NULL DEFAULT 'EUR'
+  visibility varchar(7) NOT NULL DEFAULT 'private' — CHECK ('private'/'public')
+  px_per_mm decimal(9,6) NULL
+  phash varbinary(16) NULL — перцептуальный хэш для дедупа
+  created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+  updated_at datetime2 NULL
+  row_version rowversion
+
+Индексы:
+  IX_garments_owner_visibility (owner_id, visibility) включить created_at
+  IX_garments_category (category_id)
+  IX_garments_brand (brand_id)
+  IX_garments_condition (condition_id)
+  IX_garments_phash (phash) — для быстрого дедупа
+
+
+
+╔═══════════════════════════════════╗
+║ Мультимедиа и атрибуты вещи (N:M) ║
+╚═══════════════════════════════════╝
+┌────────────────┐
+│ garment_images │
+└────────────────┘
+  id uniqueidentifier PK
+  garment_id uniqueidentifier NOT NULL, FK → garments.id ON DELETE CASCADE
+  url nvarchar(512) NOT NULL
+  width int NULL, height int NULL
+  is_primary bit NOT NULL DEFAULT 0
+  created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+
+Индекс: 
+  фильтрованный UX_garment_images_primary UNIQUE (garment_id) WHERE is_primary=1
+
+
+┌────────────────┐
+│ garment_colors │
+└────────────────┘
+  garment_id uniqueidentifier FK → garments.id ON DELETE CASCADE
+  color_id int FK → colors.id
+  is_primary bit NOT NULL DEFAULT 0
+
+PK:
+  (garment_id, color_id)
+
+
+┌──────────────────┐
+│ garment_patterns │
+└──────────────────┘
+  garment_id, pattern_id — PK (FK на garments, patterns)
+
+
+┌───────────────────┐
+│ garment_materials │
+└───────────────────┘
+  garment_id, material_id — PK (FK на garments, materials)
+
+
+┌─────────────────┐
+│ garment_seasons │
+└─────────────────┘
+  garment_id, season_code — PK (FK на garments, seasons)
+
+
+┌────────────────────────────┐
+│ garment_tags (опционально) │
+└────────────────────────────┘  
+  garment_id uniqueidentifier
+  tag nvarchar(64)
+  
+PK:
+  (garment_id, tag) — для свободных пользовательских тегов
+
+
+╔══════════════════════════╗
+║ Эмбеддинги (опционально) ║
+╚══════════════════════════╝
+┌─────────────────┐
+│ garment_vectors │
+└─────────────────┘
+  garment_id uniqueidentifier PK, FK → garments.id ON DELETE CASCADE
+  model nvarchar(64) NOT NULL — идентификатор модели эмбеддинга
+  dims smallint NOT NULL
+  vector varbinary(max) NOT NULL — массив float32
+  created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+
+
+===============================================================================
+╔══════════════════════════════╗
+║ 4) Сеты (луки) и соц-сигналы ║
+╚══════════════════════════════╝
+┌─────────┐
+│ outfits │
+└─────────┘
+  id uniqueidentifier PK
+  owner_id uniqueidentifier NOT NULL, FK → users.id ON DELETE CASCADE
+  title nvarchar(160) NULL
+  note nvarchar(1000) NULL
+  visibility varchar(7) NOT NULL DEFAULT 'private'
+  like_count int NOT NULL DEFAULT 0
+  save_count int NOT NULL DEFAULT 0
+  created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+  updated_at datetime2 NULL
+  row_version rowversion
+
+Индексы:
+  IX_outfits_owner_visibility (owner_id, visibility)
+
+
+┌─────────────────────────────────┐
+│ outfit_items (состав сета, M:N) │
+└─────────────────────────────────┘
+  outfit_id uniqueidentifier FK → outfits.id ON DELETE CASCADE
+  garment_id uniqueidentifier FK → garments.id ON DELETE CASCADE
+  z_index int NULL
+  x decimal(9,4) NULL, y decimal(9,4) NULL, scale decimal(9,4) NULL, rotation_deg decimal(6,2) NULL — позиционирование в 2D-редакторе
+
+PK:
+  (outfit_id, garment_id)
+
+
+===============================================================================
+╔════════════════════════════════╗
+║ 5) Запрос на выкуп и сообщения ║
+╚════════════════════════════════╝
+┌──────────────┐
+│ buy_requests │
+└──────────────┘
+  id uniqueidentifier PK
+  buyer_id uniqueidentifier NOT NULL FK → users.id
+  seller_id uniqueidentifier NOT NULL FK → users.id
+  garment_id uniqueidentifier NULL FK → garments.id
+  outfit_id uniqueidentifier NULL FK → outfits.id
+  price_cents int NULL
+  currency char(3) NULL DEFAULT 'EUR'
+  message nvarchar(1000) NULL
+  status varchar(16) NOT NULL DEFAULT 'open' — open|accepted|declined|closed
+  acs_thread_id nvarchar(128) NULL — ID треда в Azure Communication Services
+  created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+  updated_at datetime2 NULL
+  closed_at datetime2 NULL
+
+Проверки: 
+  garment_id XOR outfit_id (ровно одно не NULL) — через CHECK.
+
+Индексы:
+  IX_buy_requests_parties_status (seller_id, status) INCLUDE (created_at)
+  IX_buy_requests_buyer_created (buyer_id, created_at DESC)
+
+
+===============================================================================
+╔═════════════════════════════════════╗
+║ 6) Модерация и жалобы (MVP-минимум) ║
+╚═════════════════════════════════════╝
+┌─────────┐
+│ reports │
+└─────────┘
+  id uniqueidentifier PK
+  reporter_id uniqueidentifier NOT NULL FK → users.id
+  target_type varchar(16) NOT NULL — garment|outfit|user|message
+  target_id uniqueidentifier NOT NULL
+  reason_code varchar(32) NOT NULL — nsfw|spam|ip_violation|…
+  comment nvarchar(1000) NULL
+  status varchar(16) NOT NULL DEFAULT 'open' — open|in_review|resolved|rejected
+  created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+  resolved_at datetime2 NULL
+  moderator_id uniqueidentifier NULL FK → users.id
+
+Индекс: 
+  IX_reports_target (target_type, target_id, status)
+  moderation_actions
+  id uniqueidentifier PK
+  target_type varchar(16) NOT NULL
+  target_id uniqueidentifier NOT NULL
+  action varchar(24) NOT NULL — hide|delete|warn|ban|shadowban
+  notes nvarchar(500) NULL
+  actor_id uniqueidentifier NOT NULL FK → users.id
+  created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+
+
+===============================================================================
+╔══════════════════════════════════╗
+║ 7) Технические служебные таблицы ║
+╚══════════════════════════════════╝
+┌────────────────────┐
+│ search_index_state │
+└────────────────────┘
+  entity_type varchar(16) NOT NULL — garment|outfit
+  entity_id uniqueidentifier NOT NULL
+  index_name nvarchar(64) NOT NULL
+  index_version int NOT NULL DEFAULT 1
+  vector_status varchar(16) NOT NULL DEFAULT 'pending' — pending|ready|error
+  last_indexed_at datetime2 NULL
+
+PK:
+  (entity_type, entity_id, index_name)
+
+┌──────────────────────────────────────────────┐
+│ content_labels (автомодерация) (опционально) │
+└──────────────────────────────────────────────┘
+  id bigint IDENTITY PK
+  target_type varchar(16)
+  target_id uniqueidentifier
+  label varchar(32)
+  score decimal(5,4)
+  created_at datetime2 DEFAULT sysutcdatetime()
+
+
+===============================================================================
+╔═════════════════════╗
+║ 8) Связи (ER-обзор) ║
+╚═════════════════════╝
+  users (1) — (1) avatars
+  users (1) — (∞) garments
+  brands/categories/conditions/fits (1) — (∞) garments
+  garments (1) — (∞) garment_images
+  garments (∞) — (∞) colors через garment_colors
+  garments (∞) — (∞) patterns через garment_patterns
+  garments (∞) — (∞) materials через garment_materials
+  garments (∞) — (∞) seasons через garment_seasons
+  users (1) — (∞) outfits
+  outfits (∞) — (∞) garments через outfit_items
+  users (∞) — (∞) outfits через user_outfit_reactions (типы like|save)
+  users (1) — (∞) buy_requests как buyer и как seller
+  buy_requests (1) — (∞) messages
+  reports/moderation_actions привязаны к разным целям (garment|outfit|user|message) по (target_type, target_id)
+
+
+===============================================================================
+╔═══════════════════════════════════════════╗
+║ 9) Индексация и проверки (важные моменты) ║
+╚═══════════════════════════════════════════╝
+  - Фильтры каталога: индексы на category_id, brand_id, condition_id, visibility, а также на связках N:M — garment_colors(color_id, garment_id) и garment_seasons(season_code, garment_id).
+  = Публичная лента: комбинированные индексы (visibility, created_at DESC), включающие счётчики/владельца.
+  - Дедуп по фото: phash + уникальность по (owner_id, phash) при необходимости (как filtered unique).
+  - Превенция дублей реакций: PK (user_id, outfit_id, type) в user_outfit_reactions.
+  - Ровно одна основная картинка у вещи: уникальный фильтрованный индекс в garment_images WHERE is_primary=1.
+  - Целостность buy_requests: CHECK, что только одно из garment_id/outfit_id не NULL.
+
+
+===============================================================================
+╔════════════════════════════╗
+║ 10) Что удобно для EF Core ║
+╚════════════════════════════╝
+  Все PK — surrogate (uniqueidentifier/identity).
+  Для перечислений (category/condition/fit/season) — lookup-таблицы, чтобы не городить CHECK-констрейнты и легко расширяться.
+  Навигации EF:
+  - User → Avatar (1:1)
+  - Garment → Images/Colors/Patterns/Materials/Seasons (1:many/many:many)
+  - Outfit → Items (1:many) и через Items к Garments (many:many)
+  - Outfit ↔ Reactions (1:many)
+  - BuyRequest ↔ Messages (1:many)
+
+
+===============================================================================
+╔═══════════════════════════════════════════════════════════════════════════╗
+║ 11) Мини-список обязательных представлений/материализаций (по мере роста) ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+  vw_public_outfits_feed — JOIN outfits + counts + owner + превью, только visibility='public'.
+  vw_garments_search_basic — упрощённый проекционный вид с денормализованными цветами/сезонами для экспорта в Search.
+  Материализованные счётчики (если потребуется): отдельная таблица outfit_counters с фоновым апдейтом, чтобы разгрузить горячие выборки.
+
+╔════════════════════════════╗
+║╔══════════════════════════╗║
+║║ END - Модель данных (v1) ║║
+║╚══════════════════════════╝║
+╚════════════════════════════╝
+###############################################################################
+===============================================================================
+
+
+===============================================================================
+###############################################################################
+╔══════════════════════════════╗
+║╔════════════════════════════╗║
+║║ START - Модель данных (v2) ║║
+║╚════════════════════════════╝║
+╚══════════════════════════════╝
+╔═══════════════════════════╗
+║ 1) Пользователи и профиль ║
+╚═══════════════════════════╝
+┌───────┐
+│ users │
+└───────┘
+id uniqueidentifier PK (NONCLUSTERED) DEFAULT NEWSEQUENTIALID()
+email nvarchar(256) NOT NULL
+email_norm AS LOWER(email) PERSISTED
+name nvarchar(128) NULL
+role varchar(20) NOT NULL DEFAULT 'user' — user|moderator|admin
+status varchar(20) NOT NULL DEFAULT 'active' — active|blocked|deleted (soft-delete)
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+row_version rowversion
+
+Индексы:
+UX_users_email_norm UNIQUE(email_norm)
+CI_users_created CLUSTERED (created_at DESC) — малонагруженная табл., упорядочивание по дате
+
+┌───────────────────────┐
+│ avatars (1:1 с users) │
+└───────────────────────┘
+user_id uniqueidentifier PK, FK → users.id ON DELETE NO ACTION
+height_cm int NOT NULL
+weight_kg int NOT NULL
+chest_cm / waist_cm / hips_cm / foot_cm int NULL
+px_per_mm decimal(9,6) NULL — калибровка тела
+updated_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+
+===============================================================================
+╔══════════════════════════════════╗
+║ 2) Справочники (нормализованные) ║
+╚══════════════════════════════════╝
+┌────────┐
+│ brands │
+└────────┘
+id int IDENTITY PK
+name nvarchar(128) UNIQUE NOT NULL
+
+┌────────────┐
+│ categories │
+└────────────┘
+id int IDENTITY PK
+code varchar(32) UNIQUE NOT NULL — top|bottom|dress|outer|shoes|accessory
+name nvarchar(64) NOT NULL
+
+┌────────────┐
+│ conditions │
+└────────────┘
+id int IDENTITY PK
+code varchar(16) UNIQUE NOT NULL — new|like_new|good|used
+name nvarchar(64) NOT NULL
+
+┌──────┐
+│ fits │
+└──────┘
+id int IDENTITY PK
+code varchar(16) UNIQUE NOT NULL — slim|regular|oversized
+name nvarchar(64) NOT NULL
+
+┌────────┐
+│ colors │
+└────────┘
+id int IDENTITY PK
+name nvarchar(32) UNIQUE NOT NULL
+hex char(7) UNIQUE NOT NULL — #RRGGBB
+l float NULL, a float NULL, b float NULL — LAB
+CHECKS:
+hex LIKE '#[0-9A-F0-9][0-9A-F0-9][0-9A-F0-9][0-9A-F0-9][0-9A-F0-9][0-9A-F0-9]'
+l BETWEEN 0 AND 100
+a BETWEEN -128 AND 127
+b BETWEEN -128 AND 127
+
+┌──────────┐
+│ patterns │
+└──────────┘
+id int IDENTITY PK
+name nvarchar(32) UNIQUE NOT NULL — solid|striped|checked|…
+
+┌───────────┐
+│ materials │
+└───────────┘
+id int IDENTITY PK
+name nvarchar(32) UNIQUE NOT NULL — cotton|denim|knit|…
+
+┌─────────┐
+│ seasons │
+└─────────┘
+code varchar(16) PK — spring|summer|autumn|winter|all_year
+name nvarchar(32) NOT NULL
+
+┌────────────┐
+│ currencies │
+└────────────┘
+code char(3) PK — ISO 4217
+name nvarchar(64) NOT NULL
+
+===============================================================================
+╔════════════════════╗
+║ 3) Вещи (гардероб) ║
+╚════════════════════╝
+┌──────────┐
+│ garments │
+└──────────┘
+id uniqueidentifier PK (NONCLUSTERED) DEFAULT NEWSEQUENTIALID()
+owner_id uniqueidentifier NOT NULL, FK → users.id ON DELETE NO ACTION
+title nvarchar(160) NOT NULL
+brand_id int NULL, FK → brands.id
+category_id int NOT NULL, FK → categories.id
+size nvarchar(32) NULL
+fit_id int NULL, FK → fits.id
+condition_id int NULL, FK → conditions.id
+visibility varchar(7) NOT NULL DEFAULT 'private' — private|public
+is_for_sale bit NOT NULL DEFAULT 0
+price_minor int NULL — цена в минорных единицах
+currency char(3) NULL DEFAULT 'EUR', FK → currencies.code
+px_per_mm decimal(9,6) NULL — калибровка снимка (если без сессии)
+phash varbinary(16) NULL
+phash_prefix AS CONVERT(binary(4), SUBSTRING(phash,1,4)) PERSISTED
+is_hidden bit NOT NULL DEFAULT 0
+moderation_status varchar(16) NOT NULL DEFAULT 'visible' — visible|hidden|shadow|deleted
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+updated_at datetime2 NULL
+row_version rowversion
+CHECKS:
+(is_for_sale = 0 AND price_minor IS NULL) OR (is_for_sale = 1 AND price_minor IS NOT NULL)
+Индексы:
+CI_garments_owner_created CLUSTERED (owner_id, created_at DESC)
+IX_garments_visibility_created (visibility, created_at DESC) INCLUDE(owner_id, category_id, brand_id)
+IX_garments_category (category_id)
+IX_garments_brand (brand_id)
+IX_garments_condition (condition_id)
+IX_garments_sale FILTERED (is_for_sale = 1) WITH KEY (created_at DESC) INCLUDE(price_minor, currency, owner_id, category_id)
+IX_garments_public FILTERED (visibility='public') WITH KEY (created_at DESC) INCLUDE(owner_id, like_count=0) — для ленты (INCLUDE по нужде)
+IX_garments_phash (phash)
+UX_garments_owner_phash FILTERED UNIQUE (owner_id, phash) WHERE phash IS NOT NULL
+
+┌────────────────┐
+│ garment_images │
+└────────────────┘
+id uniqueidentifier PK DEFAULT NEWSEQUENTIALID()
+garment_id uniqueidentifier NOT NULL, FK → garments.id ON DELETE CASCADE
+url nvarchar(512) NOT NULL
+width int NULL, height int NULL
+is_primary bit NOT NULL DEFAULT 0
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+Индексы:
+UX_garment_images_primary UNIQUE (garment_id) WHERE is_primary=1
+Триггеры/правила:
+— запретить удаление последней картинки; гарантировать «хотя бы одна primary»
+
+┌────────────────┐
+│ garment_colors │
+└────────────────┘
+garment_id uniqueidentifier NOT NULL, FK → garments.id ON DELETE CASCADE
+color_id int NOT NULL, FK → colors.id
+is_primary bit NOT NULL DEFAULT 0
+PK:
+(garment_id, color_id)
+Индексы:
+IX_color_to_garments (color_id, garment_id)
+
+┌──────────────────┐
+│ garment_patterns │
+└──────────────────┘
+garment_id uniqueidentifier NOT NULL, FK → garments.id ON DELETE CASCADE
+pattern_id int NOT NULL, FK → patterns.id
+PK:
+(garment_id, pattern_id)
+Индексы:
+IX_pattern_to_garments (pattern_id, garment_id)
+
+┌───────────────────┐
+│ garment_materials │
+└───────────────────┘
+garment_id uniqueidentifier NOT NULL, FK → garments.id ON DELETE CASCADE
+material_id int NOT NULL, FK → materials.id
+PK:
+(garment_id, material_id)
+Индексы:
+IX_material_to_garments (material_id, garment_id)
+
+┌─────────────────┐
+│ garment_seasons │
+└─────────────────┘
+garment_id uniqueidentifier NOT NULL, FK → garments.id ON DELETE CASCADE
+season_code varchar(16) NOT NULL, FK → seasons.code
+PK:
+(garment_id, season_code)
+Индексы:
+IX_season_to_garments (season_code, garment_id)
+
+┌────────────────────────────┐
+│ garment_tags (опционально) │
+└────────────────────────────┘
+garment_id uniqueidentifier NOT NULL, FK → garments.id ON DELETE CASCADE
+tag nvarchar(64) NOT NULL
+PK:
+(garment_id, tag)
+Индексы:
+IX_tag_to_garments (tag, garment_id)
+
+┌──────────────────────┐
+│ garment_captures (*) │
+└──────────────────────┘
+id uniqueidentifier PK DEFAULT NEWSEQUENTIALID()
+garment_id uniqueidentifier NOT NULL, FK → garments.id ON DELETE CASCADE
+px_per_mm decimal(9,6) NULL
+calibrator varchar(16) NULL — a4|card|none
+device nvarchar(64) NULL
+notes nvarchar(256) NULL
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+
+╔══════════════════════════╗
+║ Эмбеддинги (опционально) ║
+╚══════════════════════════╝
+┌─────────────────┐
+│ garment_vectors │
+└─────────────────┘
+garment_id uniqueidentifier PK, FK → garments.id ON DELETE CASCADE
+model nvarchar(64) NOT NULL
+dims smallint NOT NULL
+is_l2_normalized bit NOT NULL DEFAULT 1
+vector varbinary(max) NOT NULL — массив float32
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+CHECKS:
+DATALENGTH(vector) = CONVERT(int, dims) * 4
+
+===============================================================================
+╔══════════════════════════════╗
+║ 4) Сеты (луки) и соц-сигналы ║
+╚══════════════════════════════╝
+┌─────────┐
+│ outfits │
+└─────────┘
+id uniqueidentifier PK (NONCLUSTERED) DEFAULT NEWSEQUENTIALID()
+owner_id uniqueidentifier NOT NULL, FK → users.id ON DELETE NO ACTION
+title nvarchar(160) NULL
+note nvarchar(1000) NULL
+visibility varchar(7) NOT NULL DEFAULT 'private'
+is_hidden bit NOT NULL DEFAULT 0
+moderation_status varchar(16) NOT NULL DEFAULT 'visible'
+like_count int NOT NULL DEFAULT 0
+save_count int NOT NULL DEFAULT 0
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+updated_at datetime2 NULL
+row_version rowversion
+Индексы:
+CI_outfits_owner_created CLUSTERED (owner_id, created_at DESC)
+IX_outfits_visibility_created (visibility, created_at DESC) INCLUDE(owner_id, like_count, save_count)
+
+┌────────────────────────────────┐
+│ outfit_items (состав сета M:N) │
+└────────────────────────────────┘
+outfit_id uniqueidentifier NOT NULL, FK → outfits.id ON DELETE CASCADE
+garment_id uniqueidentifier NOT NULL, FK → garments.id ON DELETE CASCADE
+z_index int NULL
+x decimal(9,4) NULL, y decimal(9,4) NULL, scale decimal(9,4) NULL, rotation_deg decimal(6,2) NULL
+PK:
+(outfit_id, garment_id)
+Индексы:
+IX_item_garment_to_outfits (garment_id, outfit_id)
+
+┌─────────────────────────────┐
+│ user_outfit_reactions (M:N) │
+└─────────────────────────────┘
+user_id uniqueidentifier NOT NULL, FK → users.id ON DELETE NO ACTION
+outfit_id uniqueidentifier NOT NULL, FK → outfits.id ON DELETE CASCADE
+type varchar(8) NOT NULL — like|save
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+PK:
+(user_id, outfit_id, type)
+Индексы:
+IX_reactions_outfit (outfit_id, type)
+
+===============================================================================
+╔═════════════════════════════════╗
+║ 5) Запросы на выкуп и сообщения ║
+╚═════════════════════════════════╝
+┌──────────────┐
+│ buy_requests │
+└──────────────┘
+id uniqueidentifier PK (NONCLUSTERED) DEFAULT NEWSEQUENTIALID()
+buyer_id uniqueidentifier NOT NULL FK → users.id ON DELETE NO ACTION
+seller_id uniqueidentifier NOT NULL FK → users.id ON DELETE NO ACTION
+garment_id uniqueidentifier NULL FK → garments.id
+outfit_id uniqueidentifier NULL FK → outfits.id
+offer_price_minor int NULL
+offer_currency char(3) NULL FK → currencies.code DEFAULT 'EUR'
+fx_rate_to_eur decimal(9,6) NULL — снапшот конверсии (аналитика)
+message nvarchar(1000) NULL
+status varchar(16) NOT NULL DEFAULT 'open' — open|accepted|declined|closed
+acs_thread_id nvarchar(128) NULL
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+updated_at datetime2 NULL
+closed_at datetime2 NULL
+row_version rowversion
+CHECKS:
+(CASE WHEN garment_id IS NULL THEN 0 ELSE 1 END + CASE WHEN outfit_id IS NULL THEN 0 ELSE 1 END) = 1
+Индексы:
+CI_buy_requests_seller_status CLUSTERED (seller_id, status, created_at DESC)
+IX_buy_requests_buyer_created (buyer_id, created_at DESC)
+Правила/триггер:
+— при вставке/обновлении проверять, что seller_id = owner_id целевого garment/outfit
+
+┌──────────┐
+│ messages │
+└──────────┘
+id uniqueidentifier PK DEFAULT NEWSEQUENTIALID()
+buy_request_id uniqueidentifier NOT NULL, FK → buy_requests.id ON DELETE CASCADE
+sender_id uniqueidentifier NOT NULL, FK → users.id ON DELETE NO ACTION
+body nvarchar(2000) NOT NULL
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+read_at datetime2 NULL
+Индексы:
+IX_messages_thread (buy_request_id, created_at)
+
+===============================================================================
+╔═════════════════════════════════════╗
+║ 6) Модерация и жалобы (MVP-минимум) ║
+╚═════════════════════════════════════╝
+┌─────────┐
+│ reports │
+└─────────┘
+id uniqueidentifier PK DEFAULT NEWSEQUENTIALID()
+reporter_id uniqueidentifier NOT NULL FK → users.id ON DELETE NO ACTION
+target_type varchar(16) NOT NULL — garment|outfit|user|message
+target_id uniqueidentifier NOT NULL
+target_owner_id uniqueidentifier NULL — денормализация владельца цели (для массовых действий)
+reason_code varchar(32) NOT NULL — nsfw|spam|ip_violation|…
+comment nvarchar(1000) NULL
+status varchar(16) NOT NULL DEFAULT 'open' — open|in_review|resolved|rejected
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+resolved_at datetime2 NULL
+moderator_id uniqueidentifier NULL FK → users.id
+Индексы:
+IX_reports_target (target_type, target_id, status)
+IX_reports_owner (target_owner_id, status)
+Правила/триггер:
+— валидация существования цели; заполнение target_owner_id
+
+┌────────────────────┐
+│ moderation_actions │
+└────────────────────┘
+id uniqueidentifier PK DEFAULT NEWSEQUENTIALID()
+target_type varchar(16) NOT NULL
+target_id uniqueidentifier NOT NULL
+action varchar(24) NOT NULL — hide|delete|warn|ban|shadowban
+notes nvarchar(500) NULL
+actor_id uniqueidentifier NOT NULL FK → users.id
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+Индексы:
+IX_mod_actions_target (target_type, target_id, created_at)
+
+===============================================================================
+╔══════════════════════════════════╗
+║ 7) Технические служебные таблицы ║
+╚══════════════════════════════════╝
+┌────────────────────┐
+│ search_index_state │
+└────────────────────┘
+entity_type varchar(16) NOT NULL — garment|outfit
+entity_id uniqueidentifier NOT NULL
+index_name nvarchar(64) NOT NULL
+index_version int NOT NULL DEFAULT 1
+vector_status varchar(16) NOT NULL DEFAULT 'pending' — pending|ready|error
+last_indexed_at datetime2 NULL
+error_message nvarchar(1000) NULL
+PK:
+(entity_type, entity_id, index_name)
+
+┌──────────────────────────────────────────────┐
+│ content_labels (автомодерация) (опционально) │
+└──────────────────────────────────────────────┘
+id bigint IDENTITY PK
+target_type varchar(16) NOT NULL
+target_id uniqueidentifier NOT NULL
+label varchar(32) NOT NULL
+score decimal(5,4) NOT NULL
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+Индексы:
+IX_labels_target (target_type, target_id)
+
+┌───────────┐
+│ audit_log │
+└───────────┘
+id bigint IDENTITY PK
+entity_type varchar(16) NOT NULL
+entity_id uniqueidentifier NOT NULL
+action varchar(32) NOT NULL — create|update|delete|status_change|…
+actor_id uniqueidentifier NULL
+payload nvarchar(max) NULL
+created_at datetime2 NOT NULL DEFAULT sysutcdatetime()
+Индексы:
+IX_audit_entity (entity_type, entity_id, created_at DESC)
+
+===============================================================================
+╔═════════════════════╗
+║ 8) Связи (ER-обзор) ║
+╚═════════════════════╝
+users (1) — (1) avatars
+users (1) — (∞) garments
+brands/categories/conditions/fits (1) — (∞) garments
+garments (1) — (∞) garment_images
+garments (∞) — (∞) colors через garment_colors (+ обратные индексы)
+garments (∞) — (∞) patterns через garment_patterns (+ обратные индексы)
+garments (∞) — (∞) materials через garment_materials (+ обратные индексы)
+garments (∞) — (∞) seasons через garment_seasons (+ обратные индексы)
+users (1) — (∞) outfits
+outfits (∞) — (∞) garments через outfit_items (+ обратный индекс)
+users (∞) — (∞) outfits через user_outfit_reactions (like|save)
+users (1) — (∞) buy_requests как buyer и как seller
+buy_requests (1) — (∞) messages
+reports/moderation_actions — полиморфно к (garment|outfit|user|message), денормализован владелец
+
+===============================================================================
+╔══════════════════════════════════════════╗
+║ 9) Индексация и проверки (горячие места) ║
+╚══════════════════════════════════════════╝
+— Лента: FILTERED (visibility='public') на outfits/garments + сортировка created_at DESC.
+— Витрина: FILTERED (is_for_sale=1) на garments + INCLUDE(price_minor, currency, owner_id).
+— Цвет/сезон: обратные индексы (color_id, garment_id) / (season_code, garment_id).
+— Дедуп: phash_prefix (bucket) + IX_garments_phash, UX(owner_id, phash) WHERE NOT NULL.
+— Валюта: справочник currencies; нормализованные цены в поисковом индексе/витринах.
+— Конкурентность: rowversion в ключевых табл. (добавлено в buy_requests).
+— Пользователь: soft-delete (status='deleted'); FK на users — ON DELETE NO ACTION.
+
+===============================================================================
+╔══════════════════════════════╗
+║ 10) Заметки по бизнес-логике ║
+╚══════════════════════════════╝
+— Триггер buy_requests_check_seller: гарантировать, что seller_id = owner_id у выбранного garment/outfit.
+— Триггер garment_images_guard: запрещать отсутствие primary; переназначать primary при удалении.
+— Индексатор: читать из vw_public_outfits_feed / vw_garments_search_basic (как и планировали).
+— Поиск по вектору: реальный ANN — во внешнем движке; garment_vectors хранить для аудита.
+
+╔════════════════════════════╗
+║╔══════════════════════════╗║
+║║ END - Модель данных (v2) ║║
+║╚══════════════════════════╝║
+╚════════════════════════════╝
+###############################################################################
+===============================================================================
+
+
+
+
+╔═══════════════════════╗
+║ Формулировка ценности ║
+╚═══════════════════════╝
+  JTBD: быстро понять «что надеть», собрать лук под событие/погоду/цветовую схему, и при желании — продать/купить готовый сет.
+
+  Кому: энтузиасты стиля, ресейлеры/секонд, минималисты (капсулы), путешественники (пак-листы), комьюнити-фанаты брендов.
+
+
+	╔══════════════════════════════════════════════════════════════════════════════════╗
+	║                              JTBD (Jobs to Be Done)                              ║
+	╠══════════════════════════════════════════════════════════════════════════════════╣
+	║ Это маркетинговая концепция и методология, основанная на идее, что потребители   ║
+	║ не просто покупают товары и услуги, а «нанимают» их для выполнения определенных  ║
+	║ «работ» или решения задач в своей жизни. Суть JTBD в том, чтобы понять глубинную ║
+	║ мотивацию клиента, его истинные потребности и желания, которые приводят к        ║
+	║ решению о покупке, а не фокусироваться только на демографических характеристиках ║
+	║ или самом продукте.                                                              ║
+	╚══════════════════════════════════════════════════════════════════════════════════╝
+
+
+
+
+╔═════════════════════════════════════════╗
+║ (1) MVP (первая версия без тяжёлого 3D) ║
+╚═════════════════════════════════════════╝
+Каталог гардероба (2D)
+  Добавление вещи: фото + автосегментация фона → категории/теги → ручные параметры (размер, бренд, состояние).
+  Помощь со скейлом: в кадре A4/банковская карта для калибровки.
+
+Аватар (мерки без 3D-скана)
+  1 Рост
+  2 Вес
+  3 Пол
+  3 Обхваты (ручной ввод или 2 фото по гайду с калибровкой).
+  
+  # Лицо - 3D скан с AI
+  # Простейшая 2D-примерка: масштаб и наложение вещи на силуэт/манекен.
+
+Сеты (луки)
+  Конструктор комплектов, пресеты (работа/спорт/вечер). Публичные/приватные.
+  Лента публичных сетов других пользователей.
+
+Запрос на выкуп
+  Кнопка «Хочу купить» → чат/инбокс. На старте — без платежей, только интерес + договорённость.
+
+Поиск/фильтры
+  1 По цвету
+  2 Сезону
+  3 Категории
+  4 Бренду
+  5 Состоянию
+  
+Метрики успеха
+  D1/D7 retention, #добавленных вещей на пользователя, #созданных сетов, конверсия «просмотр → запрос на выкуп».
+
+Этап A — «цифровой шкаф + набор образов»:
+
+
+Добавление вещи: сфоткал → автокадрирование/сегментация → теги.
+
+Конструктор сетапов: сначала 2D-компоновщик (flat-lay/манекен).
+
+Лента публичных сетапов, лайки/сохранения.
+
+Поиск/фильтры по тегам, цветам, типам.
+
+Этап B — «соц + торг»
+
+Публичность/приватность гардероба и сетапов.
+
+Запрос «хочу выкупить вещь/сет у владельца» → чат/сделка.
+
+Платёжный модуль (escrow), правила, модерация.
+
+Этап C — «3D и умный подбор»
+
+3D-аватар (параметрическая модель), прокси-3D одежды для топ-категорий.
+
+Рекоммендер «что надеть сегодня/к этой вещи»: контент-бэйзд + простая коллаборативка.
+
+AR-примерка (опционально) для аксессуаров/обуви.
+
+╔════════════════════════════╗
+║ (2) Эволюция к 3D (фазами) ║
+╚════════════════════════════╝
+Фаза 2 — полулегкий 3D
+  3D-просмотр манекена/вещей: готовые шаблонные меши для базовых категорий (футболка, худи, джинсы), масштабируемые под вашу вещь по меркам.
+  Имитация посадки на манекене без тяжелой физики (предпросчитанные позы).
+  Веб: three.js/WebGL; мобайл: RN + Expo GL или Unity (URP) только для вьюера.
+
+Фаза 3 — продвинутое 3D и физика
+  Мультиракурсная съёмка (фронт/бэк/бок) + автосегментация → «приближение к 3D» с шаблонным драпингом.
+  Серверная симуляция (PhysX/Bullet) для ограниченного набора тканей (хлопок/деним/трикотаж).
+  Подбор размера/посадки по аватару (SMPL*-подобная модель тела).
+
+
+	╔════════════════════════════════════════════════════════════════════════════════╗
+	║        MVP (Minimum Viable Product)- Минимально Жизнеспособный Продукт         ║
+	╠════════════════════════════════════════════════════════════════════════════════╣
+	║ Это стратегия, при которой продукт создается с минимальным набором функций,    ║
+	║ достаточным для удовлетворения первых пользователей и получения обратной связи ║
+	║ для дальнейшего развития. Основная цель MVP - быстро вывести продукт на рынок, ║
+	║ минимизировать риски и затраты, а также получить ценную информацию от реальных ║
+	║ пользователей.                                                                 ║
+	╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+
+
+	╔═════════════════════════════════════════════════════════════════════════╗
+	║                SMPL (Skinned Multi-Person Linear model)                 ║
+	║                  Трёхмерная модель человеческого тела                   ║
+	╠═════════════════════════════════════════════════════════════════════════╣
+	║ Используемая в компьютерной графике и искусственном интеллекте для      ║
+	║ реалистичного отображения как формы тела, так и его движений (позы) с   ║
+	║ помощью небольшого набора параметров. Также под SMPL могут              ║
+	║ подразумеваться другие вещи, например, линейка жидкостей для вейпа,     ║
+	║ акции компании Simply Good Foods Co (SMPL), или криптовалюта Simple AI. ║
+	╚═════════════════════════════════════════════════════════════════════════╝
+
+
+
+
+
+╔═════════════════════╗
+║ UX-потоки (коротко) ║
+╚═════════════════════╝
+Добавить вещь пошаговый гайд съёмки:
+  1 Автокадрирование/удаление фона
+  2 Выбрать категорию 
+  3 Ввести размер/материал.
+
+Создать сет:
+  1 Конструктор (перетаскивание)
+  2 фото/рендер сетапа
+  3 описание/хэштеги
+  4 Public/Private.
+
+Посмотреть чужие
+  1 лента
+  2 сохранение/копирование сетов в свой гардероб → «Хочу купить».
+
+Аватар 
+1 мерки вручную или по двум фото (с калибратором).
+
+
+╔══════════════════════════════════════════╗
+║ Рекомендации / логика подбора (набросок) ║
+╚══════════════════════════════════════════╝
+Совместимость по цвету: 
+  Косинусная близость эмбеддингов + простые правила (комплементарные/аналоговые).
+  Стили и дресс-коды: теги стиля (casual, smart, street, classic) и «правила корзины» (не более N акцентов и т.д.).
+  Подгон по размеру: матчи по диапазонам измерений аватара и «fit» вещи.
+  Скоринг сета: score = w1*colorHarmony + w2*styleMatch + w3*seasonMatch + w4*fitConfidence + w5*socialTrend
+
+
+╔═════════════╗
+║ Монитизация ║
+╚═════════════╝
+  Комиссия с сделок (продажа/выкуп/аукцион).
+  Pro-подписка: бесконечные сетапы, «умный стилист», аналитику гардероба (стоимость/CPW*, пробелы), экспорты.
+  Рефералка/партнёрки с магазинами и ресейл-площадками.
+  Freemium: базовый каталог бесплатно, Pro — неограниченные сеты, продвинутые рекомендации, приватные коллекции.
+  Комиссия с сделки (5–12%) + защита сделки/шиппинг (позже).
+  Партнёрка/affiliate на новые вещи.
+  White-label для ресейл-комьюнити/стилистов.
+
+	╔══════════════════════════════════════════════════════════════════════════════╗
+	║                CPW (Cost per Wear) – «стоимость одной носки»                 ║
+	╠══════════════════════════════════════════════════════════════════════════════╣
+	║ Это понятие помогает рассчитать реальную стоимость купленной вещи и оценить, ║
+	║ насколько оправданным будет вложение средств в её приобретение.              ║
+	╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+
+╔═════════════════════════════════════╗
+║ Метрики, чтобы понять, «полезно ли» ║
+╚═════════════════════════════════════╝
+  Активирован: добавил ≥5 вещей в шкаф в первую неделю.
+  Ежедневные «примерки»/создания сетапов.
+  % публичных сетапов и сохранения чужих.
+  Конверсия «увидел → запросил выкуп → оплата».
+  Доля контента на пользователя (content/user).
+  Повторные визиты без push.
+  
+
+
+╔════════════════════════╗
+║ Риски и как приземлить ║
+╚════════════════════════╝
+  1-фото → 3D — высокориск. Обходим многоракурсной съёмкой + шаблонными мешами.
+  Контент-модерация — закладываем авто-фильтры + ручную модерацию для спорных.
+  Липкость — решаем ежедневными сценариями: планировщик образов, «что надеть завтра», напоминания о невыргуляемых вещах.
+  Право на перепродажу/контрафакт — правила и KYC* для продавцов при включении платежей.
+
+
+
+	╔═════════════════════════════════════════════════════════════════════════════╗
+	║               KYC (Know Your Customer  "Знай своего клиента")               ║
+	╠═════════════════════════════════════════════════════════════════════════════╣
+	║ Это обязательный процесс проверки личности клиента компаниями, особенно     ║
+	║ финансовыми учреждениями, для предотвращения мошенничества, отмывания       ║
+	║ денег и финансирования терроризма. В рамках KYC компания собирает и         ║
+	║ верифицирует данные клиента, такие как удостоверение личности и адрес,      ║
+	║ чтобы убедиться в подлинности его личности, снизить риски и соответствовать ║
+	║ нормативным требованиям.                                                    ║
+	╚═════════════════════════════════════════════════════════════════════════════╝
+-
+
+
+
+45+31=76
+76+38=114

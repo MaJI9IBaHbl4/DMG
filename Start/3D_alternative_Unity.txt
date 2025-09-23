@@ -1,0 +1,129 @@
+1) WebGL / three.js + glTF (engine-agnostic веб-вьюер)
+
+Как работает: интерактивный 3D прямо в веб/мобиле через three.js/Babylon. Ассеты в glTF/GLB + PBR-текстуры. Для iOS/Android AR — те же ассеты, только в форматах USDZ (iOS) и Scene Viewer glTF (Android).
+Плюсы: одна кодовая база, SEO-дружественные страницы, лёгкая интеграция в React/Next.js/RN (через WebView), быстрый онбординг дизайнеров (glTF — стандарт).
+Минусы: меньше готовых аватарных SDK «из коробки», тканевая физика — упрощённая/скриптовая.
+DB-правки: сделайте движок-нейтральный слой ассетов (см. «Схема данных “Engine-agnostic”» ниже). Unity-ключи будут просто одним из вариантов.
+
+2) Готовая аватарная платформа (Ready Player Me / VRM) + web-встраивание
+
+Как работает: конструктор аватара берём готовый (Web), одежда — как набор glTF/VRM-оверлеев/слотов. В приложении открываем Web-вьюер (или нативный SDK).
+Плюсы: сверхбыстрый старт с приличным «вау», автогенерация аватара, экспорт в GLB/VRM; вы фокусируетесь на гардеробе/луках.
+Минусы: зависимость от внешнего провайдера, лицензирование ассетов, ограничения на глубокую кастомизацию.
+DB-правки: в avatars хранить avatar_provider, avatar_recipe_json, avatar_asset_url (GLB/VRM); в asset_formats добавьте тип provider.
+
+3) 2.5D «псевдо-3D»: слои + перспективные трансформации (самый простой MVP)
+
+Как работает: вещи — вырезанные PNG/WebP с альфой; манекен — набор поз в ракурсе; в редакторе — масштаб/наклон/перспектива (матрицы 2D).
+Плюсы: минимальная стоимость и время, летает на любом устройстве, отличные превью/карточки, достаточно для «собрать лук и поделиться».
+Минусы: нет настоящей глубины и физики; точность посадки ограничена.
+DB-правки: ничего радикального — добавьте в garment_assets тип image2d + pose_id, а в outfit_items храните transform2d_json. Позже можно безболезненно перейти на 3D, не ломая данные.
+
+4) «Облачный рендер» статичных превью + лёгкий вьюер по клику
+
+Как работает: сервер (или воркер в облаке) рендерит PNG/WEBP превью луков (Blender/Three headless). Пользователь видит быстрые картинки; 3D-вьюер грузится только по запросу.
+Плюсы: мгновенная лента/SEO, низкий клиентский бюджет, масштабируемые «кадры-по-требованию».
+Минусы: сложнее инфраструктура (рендер-очереди), интерактив не всегда «сразу».
+DB-правки: добавьте render_jobs и render_outputs (ссылка на превью/метаданные). Слои ассетов — как в «engine-agnostic».
+
+5) Godot 4 (C#) как лёгкий 3D-модуль (вместо Unity)
+
+Как работает: отдельный мини-клиент на Godot (есть C#), встраивается в нативные приложения/десктоп, рендерит 3D-примерку; всё остальное — обычный RN/веб.
+Плюсы: бесплатный, лёгкий рантайм, C# остаётся; гибкий пайплайн glTF.
+Минусы: меньше плагинов и экосистемы под «моду»; потребует свои UI-инструменты.
+DB-правки: те же «engine-agnostic» (ниже). Добавьте формат godot_pck/glb.
+
+Рекомендация по стратегии
+
+Если нужен быстрый «вау» без тяжёлого клиента: стартуйте с варианта 2 (аватарный провайдер) + вариант 1 (WebGL-вьюер glTF), а в ленту отдавайте рендер-превью (вариант 4).
+
+Если нужен сверхбыстрый MVP по времени/бюджету: вариант 3 (2.5D) → потом «подмена» вещей на glTF и включение 3D-вьюера.
+
+Unity можно оставить позже как «премиальный» редактор/промерка (или вовсе не включать, если web-3D устроит).
+
+Схема данных «Engine-agnostic» (замена/надстройка v3)
+
+Главная идея — одна модель предмета, много форматов поставки (Unity, glTF, USDZ, изображения). Это даёт свободу: Unity/WebGL/AR — выбор на уровне клиента, а база — неизменна.
+
+Новые/изменённые таблицы
+-- Что это за 3D/2D сущность в каталоге (движок-нейтрально)
+CREATE TABLE assets (
+  id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWSEQUENTIALID(),
+  type VARCHAR(16) NOT NULL,         -- 'avatar_rig' | 'garment' | 'pose' | 'matset' | 'physics'
+  rig_type VARCHAR(16) NULL,         -- 'VRM'|'UMA'|'Humanoid'|NULL
+  slot VARCHAR(24) NULL,             -- Top|Bottom|Dress|Shoes|Acc|Body
+  coverage_mask INT NULL,            -- что скрывает (биты)
+  exclusion_mask INT NULL,           -- несовместимые слоты
+  meters_per_unit FLOAT NULL,
+  tri_count INT NULL,                -- бюджет трисов (для контроля качества)
+  meta_json NVARCHAR(MAX) NULL,      -- произвольные характеристики (PBR, anchors и т.п.)
+  created_at DATETIME2 NOT NULL DEFAULT sysutcdatetime()
+);
+
+-- Конкретные носители/форматы поставки одного и того же ассета
+CREATE TABLE asset_formats (
+  asset_id UNIQUEIDENTIFIER NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
+  target VARCHAR(16) NOT NULL,       -- 'web'|'ios_ar'|'android_ar'|'unity'|'provider'
+  format VARCHAR(16) NOT NULL,       -- 'glb'|'vrm'|'usdz'|'addr'|'png'
+  url NVARCHAR(512) NULL,            -- CDN/HTTP (glTF/usdz/png)
+  engine_key NVARCHAR(128) NULL,     -- Addressables key (для Unity) или id у провайдера
+  hash CHAR(64) NULL,                -- контроль версий
+  size_bytes INT NULL,
+  PRIMARY KEY (asset_id, target)
+);
+
+-- Связь «вещь → один или несколько ассетов»
+CREATE TABLE garment_assets (
+  garment_id UNIQUEIDENTIFIER NOT NULL REFERENCES garments(id) ON DELETE CASCADE,
+  asset_id UNIQUEIDENTIFIER NOT NULL REFERENCES assets(id),
+  material_variant NVARCHAR(32) NULL,
+  tint_hex CHAR(7) NULL,
+  PRIMARY KEY (garment_id, asset_id)
+);
+
+-- Аватар: рецепт/провайдер/формат
+ALTER TABLE avatars ADD
+  avatar_format VARCHAR(16) NULL,        -- 'VRM'|'GLB'|'UMA'|'Provider'
+  avatar_asset_id UNIQUEIDENTIFIER NULL REFERENCES assets(id),
+  avatar_provider VARCHAR(32) NULL,      -- 'RPM'|'Avaturn'|...
+  recipe_json NVARCHAR(MAX) NULL;        -- blendshapes/DNA/параметры
+
+-- Поза (для превью/подиума), может быть 2D- и 3D-представление
+-- (reuse таблицы assets с type='pose')
+
+-- 2D превью, если нужен «облачный рендер»
+CREATE TABLE render_jobs (
+  id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWSEQUENTIALID(),
+  target_type VARCHAR(16) NOT NULL,      -- 'outfit'|'garment'
+  target_id UNIQUEIDENTIFIER NOT NULL,
+  pose_asset_id UNIQUEIDENTIFIER NULL REFERENCES assets(id),
+  camera_preset VARCHAR(32) NULL,
+  bg NVARCHAR(64) NULL,
+  status VARCHAR(16) NOT NULL DEFAULT 'queued',  -- queued|ok|error
+  output_url NVARCHAR(512) NULL,
+  created_at DATETIME2 NOT NULL DEFAULT sysutcdatetime(),
+  updated_at DATETIME2 NULL
+);
+
+-- Для 2.5D режима достаточно дополнить outfit_items:
+ALTER TABLE outfit_items ADD transform2d_json NVARCHAR(MAX) NULL;
+
+Контракты API (минимум)
+
+GET /catalog/assets?slot=Top&target=web → список форматов (glb/png).
+
+GET /me/avatar → { avatar_format, recipe_json, avatar_asset: {target:'web',url:'...'} }.
+
+GET /wardrobes/{id}/garments → вместе с garment_assets (web/unity/ar форматы).
+
+POST /render-jobs → фоновый рендер превью (если нужен).
+
+Что выбрать прямо сейчас
+
+Хотите минимум усилий и достойный результат: вариант 2 + 1 (встраиваемый конструктор аватара + WebGL-вьюер glTF).
+
+Хотите супер-MVP за недели: вариант 3 (2.5D), но с «engine-agnostic» схемой, чтобы затем бесшовно перейти на 3D.
+
+Unity можно оставить как опциональный модуль позднее — схема выше это позволяет (в asset_formats просто добавите target='unity' с ключом Addressables).
+
+Так вы сохраните C# на сервере, ускорите клиентскую часть, не потеряете SEO/веб-охват и, главное, не привяжете данные к одному движку.

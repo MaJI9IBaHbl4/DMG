@@ -1,0 +1,161 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/25.0.2 Chrome/128.0.6613.186 Electron/32.2.5 Safari/537.36" version="25.0.2">
+  <diagram name="Страница — 1" id="8KsvC3asX-xPVo3QP15p">
+    <mxGraphModel dx="3336" dy="866" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-1" target="5dAj2VQKXzpIcd0tK03E-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-1" value="Inicializacija&lt;div&gt;Log screen&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="343" y="340" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-2" target="5dAj2VQKXzpIcd0tK03E-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-2" target="5dAj2VQKXzpIcd0tK03E-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-2" target="5dAj2VQKXzpIcd0tK03E-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-2" value="Menu" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="343" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-3" target="5dAj2VQKXzpIcd0tK03E-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-57" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-3" target="5dAj2VQKXzpIcd0tK03E-36">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-58" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-3" target="5dAj2VQKXzpIcd0tK03E-37">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-3" value="Experimentai su drabuziais" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-360" y="560" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-4" target="5dAj2VQKXzpIcd0tK03E-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-4" target="5dAj2VQKXzpIcd0tK03E-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-4" value="Rubu pirkimas is brandu" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="343" y="550" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-8" target="5dAj2VQKXzpIcd0tK03E-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-8" value="Community" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1330" y="560" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-3" target="5dAj2VQKXzpIcd0tK03E-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-13" target="5dAj2VQKXzpIcd0tK03E-29">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-13" target="5dAj2VQKXzpIcd0tK03E-31">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-13" target="5dAj2VQKXzpIcd0tK03E-32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-13" value="Infinit scroll&lt;div&gt;&lt;br&gt;&lt;div&gt;Turinis skirstosi i 3 kategorijas:&lt;br&gt;&lt;div&gt;1. Renginiai&amp;nbsp;&lt;/div&gt;&lt;div&gt;2. Vartotoju outfit&lt;/div&gt;&lt;div&gt;3. Collaboration&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Formatas visur tas pats&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Darom lygiai taip pat kaip instagram&lt;/div&gt;&lt;div&gt;Laikai&lt;/div&gt;&lt;div&gt;Commentai&lt;/div&gt;&lt;div&gt;Pats kontentas&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="750.83" width="240" height="220.83" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-17" value="Isbaigti outfit&#39;a&lt;div&gt;&lt;br&gt;&lt;div&gt;Matome rubu pasiulymus&lt;div&gt;Rubai kuriu truksta vartotojui (sprendima, ko truksta priima AI)&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;(Toks pats, kaip ir antras, bet tau matai ne rubus o tai kaip jie ant taves sedi, jeigu tau patinka - tave permeta i antra langa)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="41" y="660" width="250" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-18" target="5dAj2VQKXzpIcd0tK03E-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-18" value="Perziureti brend&#39;u rubus, kad nupirkti&lt;br&gt;&lt;br&gt;&lt;div&gt;(tiesiog parduotuve)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="551" y="640" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-25" target="5dAj2VQKXzpIcd0tK03E-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-25" value="Pats rubu sarasas pagal brandus arba kitus filtrus ir sortiravimas" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="551" y="770" width="180" height="89" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-26" value="Pirkimo langas" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="571" y="915" width="140" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-29" value="1. Renginiai&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Perejus ant renginio matome unikalu langa, kurimae gali registruotis renginiams&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="960" y="1050" width="230" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-31" value="2. Vartotoju outfit&#39;ai&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Toks pats kaip instagram&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1275" y="1050" width="230" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-32" value="2. Community&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Toks pats kaip instagram ????????&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1590" y="1050" width="230" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-35" value="1. Mano spinta&lt;div&gt;&lt;br&gt;&lt;div&gt;Matome visus savo rubus ir aksesuarus&lt;br&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Galima pereiti ant 3 punktu (generavimas vaizdo)&lt;/div&gt;&lt;/div&gt;&lt;div style=&quot;padding-right: 0px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;padding-right: 0px;&quot;&gt;2. Rubus galima prideti i &quot;kapsules kategorija&quot;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-650" y="680" width="230" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-36" value="2. Kapsule&lt;div&gt;(Kertiniai rubai)&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-360" y="680" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-37" value="3. Galutinio vaizdo generavimas (experimentai)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-160" y="680" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-43" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-39" target="5dAj2VQKXzpIcd0tK03E-42">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-39" value="Sign in" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1840" y="340" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-40" target="5dAj2VQKXzpIcd0tK03E-48">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-40" value="Nick, Pastas, password&#39;as" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-2000" y="540" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-41" target="5dAj2VQKXzpIcd0tK03E-48">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-1780" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-41" value="Google Acc" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1679" y="540" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-42" target="5dAj2VQKXzpIcd0tK03E-40">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-45" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-42" target="5dAj2VQKXzpIcd0tK03E-41">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-42" target="5dAj2VQKXzpIcd0tK03E-46">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-42" value="OR" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1820" y="450" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-46" target="5dAj2VQKXzpIcd0tK03E-48">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-1780.0689655172414" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-46" value="Facebook" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1840" y="570" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-48" target="5dAj2VQKXzpIcd0tK03E-52">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-48" value="&lt;b&gt;Anketa&lt;/b&gt;&lt;div&gt;Anketa bus iki 09-26&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="-1840" y="760" width="120" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5dAj2VQKXzpIcd0tK03E-52" target="5dAj2VQKXzpIcd0tK03E-54">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-52" value="&lt;b&gt;Avataro kurimas&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1840" y="1030" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5dAj2VQKXzpIcd0tK03E-54" value="Fotografavimas pagal modelio fotogramavimo standartus" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1905" y="1180" width="250" height="130" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,638 @@
+# Умный гардероб — спецификация MVP (Azure, .NET 8, EF Core)
+
+| Раздел | Название |
+|---|---|
+| 0 | Введение и назначение документа |
+
+Документ собирает всё из исходной идеи **умного гардероба** и перерабатывает под стек **Azure + C# .NET 8 + EF Core**. 
+Содержит архитектуру, модели, API, пайплайны обработки изображений, поиск/рекомендации, безопасность, DevOps, метрики и roadmap. 
+Термины поясняются в *Глоссарии* в конце.
+
+---
+
+## 1. Формулировка ценности (JTBD)
+
+| Раздел | Что внутри |
+|---|---|
+| 1 | Кому и какую работу продукт помогает сделать |
+
+**JTBD:** быстро понять «что надеть», собрать лук под событие/погоду/цветовую схему, и при желании — продать/купить готовый сет.
+**ЦА:** энтузиасты стиля, ресейлеры/секонд, минималисты (капсулы), путешественники, фанаты брендов.
+
+---
+
+## 2. Обзор архитектуры (Azure-first)
+
+| Раздел | Что внутри |
+|---|---|
+| 2 | Компоненты и их назначение |
+
+- **Клиент:** React Native (Expo) + Web (Next.js). 2D-конструктор на Canvas/WebGL. 3D-вьюер позже.
+- **API:** ASP.NET Core (.NET 8, Minimal APIs/Controllers) в **Azure App Service**.
+- **Хранилище данных:** **Azure SQL Database** (EF Core 8). JSON-хранение в NVARCHAR(MAX) + JSON-функции; индексы по часто фильтруемым полям.
+- **Векторные признаки:** Вариант A — **Azure AI Search** (векторные поля + фильтры + семантический ранкер). Вариант B — **Azure SQL Vector** (если доступно в регионе) с `VECTOR`/`VECTOR_DISTANCE`.
+- **Медиа:** **Azure Blob Storage** (+ **SAS** URLs) + **Azure CDN**.
+- **Фоновая обработка:** **Azure Functions** (Queue/Event Grid триггеры) + **Storage Queue**/**Service Bus**.
+- **Поиск/фид:** Azure AI Search (индекс «garments», «outfits»), агрегации/фасеты.
+- **Модерация контента:** **Azure AI Content Safety** (изображения/текст).
+- **Чат и «Хочу купить»:** **Azure Communication Services (Chat)**.
+- **Аутентификация:** **Microsoft Entra External ID** (ex Azure AD B2C).
+- **Наблюдаемость:** **Azure Application Insights** (+ дашборды ретеншена), логирование Serilog.
+- **Секреты:** **Azure Key Vault**; конфигурация — **Azure App Configuration** (фича-флаги).
+
+---
+
+## 3. Доменная модель (EF Core, C#)
+
+| Раздел | Что внутри |
+|---|---|
+| 3 | Сущности, связи, перечисления |
+
+```csharp
+public class User
+{
+    public Guid Id { get; set; }
+    public string Email { get; set; } = default!;
+    public string? Name { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public Avatar? Avatar { get; set; }
+    public ICollection<Garment> Garments { get; set; } = new List<Garment>();
+    public ICollection<Outfit> Outfits { get; set; } = new List<Outfit>();
+}
+
+public class Avatar
+{
+    public Guid UserId { get; set; }
+    public User User { get; set; } = default!;
+    public int HeightCm { get; set; }
+    public int WeightKg { get; set; }
+    public int? ChestCm { get; set; }
+    public int? WaistCm { get; set; }
+    public int? HipsCm { get; set; }
+    public decimal? PxPerMm { get; set; } // калибровка по A4/карте
+    public string? SkinTone { get; set; }
+    public string? BodyShape { get; set; } // A,V,X,H
+}
+
+public enum GarmentCategory { Top, Bottom, Dress, Outer, Shoes, Accessory }
+public enum GarmentCondition { New, LikeNew, Good, Used }
+public enum Visibility { Private, Public }
+
+public class Garment
+{
+    public Guid Id { get; set; }
+    public Guid OwnerId { get; set; }
+    public User Owner { get; set; } = default!;
+
+    public string Title { get; set; } = default!;
+    public string? Brand { get; set; }
+    public GarmentCategory Category { get; set; }
+    public string? Size { get; set; }
+    public string? Fit { get; set; }
+
+    // Колонки, сериализуемые в JSON (NVARCHAR(MAX))
+    public string[] Colors { get; set; } = Array.Empty<string>();
+    public string[] Patterns { get; set; } = Array.Empty<string>();
+    public string[] Season { get; set; } = Array.Empty<string>();
+    public string[] Materials { get; set; } = Array.Empty<string>();
+    public List<string> Images { get; set; } = new();
+
+    // Векторные эмбеддинги изображения (384, например)
+    public float[]? FeaturesVec { get; set; }
+
+    public bool IsForSale { get; set; }
+    public int? PriceCents { get; set; }
+    public GarmentCondition? Condition { get; set; }
+    public Visibility Visibility { get; set; } = Visibility.Private;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+}
+
+public class Outfit
+{
+    public Guid Id { get; set; }
+    public Guid OwnerId { get; set; }
+    public User Owner { get; set; } = default!;
+    public string? Title { get; set; }
+    public string? Note { get; set; }
+    public Visibility Visibility { get; set; } = Visibility.Private;
+    public int Likes { get; set; }
+    public int Saves { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public List<OutfitItem> Items { get; set; } = new();
+}
+
+public class OutfitItem
+{
+    public Guid OutfitId { get; set; }
+    public Outfit Outfit { get; set; } = default!;
+    public Guid GarmentId { get; set; }
+    public Garment Garment { get; set; } = default!;
+    public int Order { get; set; }
+}
+
+public class BuyRequest
+{
+    public Guid Id { get; set; }
+    public Guid BuyerId { get; set; }
+    public Guid SellerId { get; set; }
+    public Guid? GarmentId { get; set; }
+    public Guid? OutfitId { get; set; }
+    public string? Message { get; set; }
+    public int? PriceCents { get; set; }
+    public string Status { get; set; } = "open"; // open/accepted/declined/closed
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public List<Message> Messages { get; set; } = new();
+}
+
+public class Message
+{
+    public Guid Id { get; set; }
+    public Guid ThreadId { get; set; } // = BuyRequest.Id
+    public Guid SenderId { get; set; }
+    public string Body { get; set; } = default!;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+}
+```
+
+---
+
+## 4. DbContext и маппинг (EF Core 8)
+
+| Раздел | Что внутри |
+|---|---|
+| 4 | Конверсии JSON, индексы, альтернативы для векторов |
+
+```csharp
+public class AppDb : DbContext
+{
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Avatar> Avatars => Set<Avatar>();
+    public DbSet<Garment> Garments => Set<Garment>();
+    public DbSet<Outfit> Outfits => Set<Outfit>();
+    public DbSet<OutfitItem> OutfitItems => Set<OutfitItem>();
+    public DbSet<BuyRequest> BuyRequests => Set<BuyRequest>();
+    public DbSet<Message> Messages => Set<Message>();
+
+    public AppDb(DbContextOptions<AppDb> options) : base(options) { }
+
+    protected override void OnModelCreating(ModelBuilder b)
+    {
+        b.Entity<User>().HasKey(x => x.Id);
+        b.Entity<Avatar>().HasKey(x => x.UserId);
+        b.Entity<Avatar>()
+            .HasOne(x => x.User)
+            .WithOne(x => x.Avatar)
+            .HasForeignKey<Avatar>(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        b.Entity<OutfitItem>().HasKey(x => new { x.OutfitId, x.GarmentId });
+        b.Entity<OutfitItem>()
+            .HasOne(i => i.Outfit).WithMany(o => o.Items).HasForeignKey(i => i.OutfitId);
+        b.Entity<OutfitItem>()
+            .HasOne(i => i.Garment).WithMany().HasForeignKey(i => i.GarmentId);
+
+        // JSON-массивы → NVARCHAR(MAX) с конвертерами
+        var jsonStringArrayConverter = new ValueConverter<string[], string>(
+            v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+            v => string.IsNullOrWhiteSpace(v) ? Array.Empty<string>() : JsonSerializer.Deserialize<string[]>(v)!
+        );
+        var jsonStringListConverter = new ValueConverter<List<string>, string>(
+            v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+            v => string.IsNullOrWhiteSpace(v) ? new List<string>() : JsonSerializer.Deserialize<List<string>>(v)!
+        );
+        b.Entity<Garment>().Property(g => g.Colors).HasConversion(jsonStringArrayConverter).HasColumnType("nvarchar(max)");
+        b.Entity<Garment>().Property(g => g.Patterns).HasConversion(jsonStringArrayConverter).HasColumnType("nvarchar(max)");
+        b.Entity<Garment>().Property(g => g.Season).HasConversion(jsonStringArrayConverter).HasColumnType("nvarchar(max)");
+        b.Entity<Garment>().Property(g => g.Materials).HasConversion(jsonStringArrayConverter).HasColumnType("nvarchar(max)");
+        b.Entity<Garment>().Property(g => g.Images).HasConversion(jsonStringListConverter).HasColumnType("nvarchar(max)");
+
+        // Векторные эмбеддинги:
+        // Вариант A: AI Search — хранение/поиск во внешнем индексе.
+        // Вариант B: Azure SQL Vector (если доступно): колонка VECTOR(384).
+        b.Entity<Garment>().Property(g => g.FeaturesVec)
+            .HasColumnType("vector(384)"); // если тип недоступен, замените на VARBINARY(MAX)
+        
+        // Индексы/фильтры
+        b.Entity<Garment>().HasIndex(g => g.OwnerId);
+        b.Entity<Garment>().HasIndex(g => new { g.Category, g.Brand });
+        b.Entity<Garment>().HasIndex(g => g.Visibility);
+        b.Entity<Outfit>().HasIndex(o => new { o.OwnerId, o.Visibility });
+    }
+}
+```
+
+> **Примечание:** В SQL Server/Azure SQL нет отдельного типа JSON — данные хранятся в `NVARCHAR(MAX)` с JSON‑функциями (`JSON_VALUE`, `ISJSON`). EF Core 8 удобно маппит через конвертеры; при необходимости создавайте вычисляемые колонки для индексации отдельных JSON‑полей.
+
+---
+
+## 5. REST API (Minimal APIs, .NET 8)
+
+| Раздел | Что внутри |
+|---|---|
+| 5 | Основные эндпоинты и примеры |
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<AppDb>(o =>
+    o.UseSqlServer(builder.Configuration.GetConnectionString("sql")));
+builder.Services.AddApplicationInsightsTelemetry();
+builder.Services.AddAuthentication(/* Entra ID B2C */);
+builder.Services.AddAuthorization();
+
+var app = builder.Build();
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Загрузка вещи (через предварительно полученный SAS для клиента)
+app.MapPost("/api/garments", async (
+    AppDb db,
+    [FromBody] Garment dto,
+    ClaimsPrincipal user) =>
+{
+    // TODO: получить userId из токена
+    dto.OwnerId = /* userId */ Guid.NewGuid();
+    dto.CreatedAt = DateTimeOffset.UtcNow;
+    db.Garments.Add(dto);
+    await db.SaveChangesAsync();
+    return Results.Created($"/api/garments/{dto.Id}", dto);
+}).RequireAuthorization();
+
+// Получить ленту публичных сетов
+app.MapGet("/api/feed/outfits", async (AppDb db, int take = 20, int skip = 0) =>
+{
+    var items = await db.Outfits
+        .Where(o => o.Visibility == Visibility.Public)
+        .OrderByDescending(o => o.Likes + o.Saves)
+        .Skip(skip).Take(take)
+        .Select(o => new {
+            o.Id, o.Title, o.Likes, o.Saves, o.CreatedAt,
+            Items = o.Items.Select(i => i.GarmentId)
+        })
+        .ToListAsync();
+    return items;
+});
+
+// Запрос «Хочу купить»
+app.MapPost("/api/buy-requests", async (AppDb db, BuyRequest req, ClaimsPrincipal user) =>
+{
+    req.Id = Guid.NewGuid();
+    req.Status = "open";
+    req.CreatedAt = DateTimeOffset.UtcNow;
+    req.BuyerId = /* userId */ Guid.NewGuid();
+    db.BuyRequests.Add(req);
+    await db.SaveChangesAsync();
+    return Results.Created($"/api/buy-requests/{req.Id}", req);
+}).RequireAuthorization();
+
+// Сообщение в тред
+app.MapPost("/api/buy-requests/{id:guid}/messages", async (Guid id, AppDb db, Message msg, ClaimsPrincipal user) =>
+{
+    msg.Id = Guid.NewGuid();
+    msg.ThreadId = id;
+    msg.CreatedAt = DateTimeOffset.UtcNow;
+    db.Messages.Add(msg);
+    await db.SaveChangesAsync();
+    return Results.Ok(msg);
+}).RequireAuthorization();
+
+app.Run();
+```
+
+---
+
+## 6. Медиа и фоновые пайплайны (Blob → Event Grid → Functions)
+
+| Раздел | Что внутри |
+|---|---|
+| 6 | Как файл проходит обработку |
+
+1. Клиент запрашивает **SAS** на загрузку: `POST /api/uploads/sas` → URL на Blob (15 мин).
+2. Загрузка изображения в контейнер `incoming/`.
+3. **Event Grid** генерирует событие `BlobCreated` → триггерит **Azure Function**.
+4. Function: удаление фона/сегментация → автотеги/цвет → эмбеддинг → запись в **Azure SQL** и/или **AI Search**.
+5. Итоговые файлы кладём в `processed/` и обновляем карточку вещи.
+
+**Function (скелет):**
+```csharp
+public class ProcessGarmentFn
+{
+    private readonly AppDb _db;
+    public ProcessGarmentFn(AppDb db) => _db = db;
+
+    [Function("ProcessGarment")]
+    public async Task Run([BlobTrigger("garments/incoming/{name}", Connection = "BlobConn")] Stream blob,
+                          string name,
+                          [Blob("garments/processed/{name}", FileAccess.Write)] Stream output,
+                          FunctionContext ctx)
+    {
+        // 1) Сегментация/удаление фона (ONNX/Custom Vision) → output
+        // 2) Извлечь теги (Vision/Custom Vision) и цвета
+        // 3) Посчитать эмбеддинг (локальная модель CLIP/ONNX)
+        // 4) Найти Garment по имени/метадате и обновить JSON-поля + FeaturesVec
+        // 5) Обновить документ в Azure AI Search (если используется)
+        await Task.CompletedTask;
+    }
+}
+```
+
+---
+
+## 7. Поиск и рекомендации
+
+| Раздел | Что внутри |
+|---|---|
+| 7 | Индекс, пример запроса, скоринг рекомендаций |
+
+**Azure AI Search — индекс `garments` (фрагмент):**
+```json
+{
+  "name": "garments",
+  "fields": [
+    { "name": "id", "type": "Edm.String", "key": true },
+    { "name": "title", "type": "Edm.String", "searchable": true },
+    { "name": "brand", "type": "Edm.String", "filterable": true, "facetable": true },
+    { "name": "category", "type": "Edm.String", "filterable": true, "facetable": true },
+    { "name": "colors", "type": "Collection(Edm.String)", "filterable": true, "facetable": true },
+    { "name": "condition", "type": "Edm.String", "filterable": true, "facetable": true },
+    { "name": "featuresVec", "type": "Collection(Edm.Single)", "vectorSearchDimensions": 384 }
+  ],
+  "vectorSearch": { "algorithms": [ { "name": "hnsw", "kind": "hnsw" } ] }
+}
+```
+**Рекомендации (упрощённая формула):**
+```
+score = 0.35*colorHarmony + 0.25*styleMatch + 0.15*seasonMatch + 0.15*fitConfidence + 0.10*socialTrend
+```
+**FitConfidence (пример):**
+```
+fit = 1 - clamp( |garment.waist - avatar.waist|/8cm + |garment.hips - avatar.hips|/10cm, 0, 1 )
+```
+
+**Альтернатива (Azure SQL Vector):** хранить `FeaturesVec` в `VECTOR(384)` и делать `ORDER BY VECTOR_DISTANCE('cosine', @q, FeaturesVec)`.
+
+---
+
+## 8. Аватар и примерка (MVP без 3D)
+
+| Раздел | Что внутри |
+|---|---|
+| 8 | Ввод мерок, 2D-компоновщик |
+
+- Ввод: рост/вес/обхваты вручную или по двум фото с калибратором (A4/банковская карта).
+- 2D-примерка: масштаб/наложение на силуэт/манекен (flat/манекен вид).
+
+---
+
+## 9. Сеты (луки) и соц-слой
+
+| Раздел | Что внутри |
+|---|---|
+| 9 | Конструктор, лента, приватность |
+
+- Конструктор сетов: drag&drop, пресеты (работа/спорт/вечер), снимок сетапа.
+- Публичные/приватные сеты; лента, лайки, сохранения, репост к себе.
+
+---
+
+## 10. «Хочу купить» и чат
+
+| Раздел | Что внутри |
+|---|---|
+| 10 | Сделка без платежей на старте, чат на ACS |
+
+- Кнопка «Хочу купить» → создание **BuyRequest** → чат в **Azure Communication Services** (тред = `BuyRequest.Id`).
+- На этапе B: платёжный модуль (escrow), рейтинги продавцов, возвраты, доставка.
+
+---
+
+## 11. Эволюция к 3D (фазы)
+
+| Раздел | Что внутри |
+|---|---|
+| 11 | Лёгкий 3D → продвинутый 3D |
+
+- **Фаза 2 (полулёгкий 3D):** шаблонные меши (футболка, худи, джинсы), масштаб под мерки; предпросчитанные позы; WebGL/Three.js (web), RN + Expo GL/Unity (viewer).
+- **Фаза 3 (продвинутый 3D):** мультиракурсная съёмка + автосегментация → приближение к 3D; серверная симуляция ткани (ограниченные типы); SMPL‑подобная модель для посадки.
+
+---
+
+## 12. UX-потоки (MVP)
+
+| Раздел | Что внутри |
+|---|---|
+| 12 | Основные сценарии |
+
+- **Добавить вещь:** съёмка → автосегментация → категория → размер/материал.
+- **Создать сет:** конструктор → фото/рендер → описание/хэштеги → Public/Private.
+- **Лента:** просмотр → сохранение/репост → «Хочу купить».
+- **Аватар:** мерки вручную/по фото с калибратором.
+
+---
+
+## 13. Монетизация
+
+| Раздел | Что внутри |
+|---|---|
+| 13 | Источники выручки |
+
+- Комиссия с сделок (5–12%) + защита сделки/шиппинг (позже).
+- **Pro‑подписка:** неограниченные сеты, умный стилист, аналитика гардероба (оценка стоимости, **CPW**), приватные коллекции, экспорты.
+- Affiliate/партнёрки с магазинами/брендами, white‑label для комьюнити/стилистов.
+
+---
+
+## 14. Метрики и аналитика
+
+| Раздел | Что внутри |
+|---|---|
+| 14 | KPI и телеметрия |
+
+- **Активация:** ≥5 добавленных вещей в первые 7 дней.
+- **D1/D7 retention**, #созданных сетов/нед., конверсия «просмотр → запрос на выкуп».
+- % публичных сетов, сохранения/пользователь, покрытие автотегов.
+- **Application Insights**: события (`AddedGarment`, `CreatedOutfit`, `BuyRequestCreated`), треки фич-флагов, распределённые трейсинг и зависимости.
+
+---
+
+## 15. Модерация, безопасность, комплаенс
+
+| Раздел | Что внутри |
+|---|---|
+| 15 | Контент, приватность, правовые аспекты |
+
+- **Content Safety:** авто‑модерация изображений/текста; репорты/апелляции; скрытие/бан.
+- **GDPR/PII:** минимизация данных; правомерные основания, удаление по запросу; шифрование в покое/транзите; доступы по ролям.
+- **KYC/антимошенничество** (при включении платежей): провайдер верификации, лимиты, поведенческие сигналы.
+
+---
+
+## 16. DevOps и инфраструктура
+
+| Раздел | Что внутри |
+|---|---|
+| 16 | Список ресурсов, окружения, IaC |
+
+- **Ресурсы Azure:** App Service (API), Azure SQL, Storage (Blob), CDN, Functions, Event Grid, AI Search, Communication Services, Key Vault, App Configuration, Application Insights.
+- **Окружения:** `dev` / `staging` / `prod` с изолированными ресурс‑группами.
+- **IaC:** Bicep/Terraform; переменные окружения/секреты из Key Vault; слоты деплоя App Service.
+- **CI/CD:** GitHub Actions/Azure Pipelines (сборка, миграции EF, деплой функций/сервисов, прогрев индексов поиска).
+
+**Bicep (скелет, фрагмент):**
+```bicep
+param location string = resourceGroup().location
+param env string = 'dev'
+
+resource st 'Microsoft.Storage/storageAccounts@2023-01-01' = { /* ... */ }
+resource sql 'Microsoft.Sql/servers@2022-05-01-preview' = { /* ... */ }
+resource db  'Microsoft.Sql/servers/databases@2022-05-01-preview' = { /* ... */ }
+resource app 'Microsoft.Web/sites@2022-03-01' = { /* ... */ }
+resource func 'Microsoft.Web/sites@2022-03-01' = { /* ... */ } // Function App
+resource kv 'Microsoft.KeyVault/vaults@2022-07-01' = { /* ... */ }
+resource ais 'Microsoft.Search/searchServices@2023-11-01' = { /* ... */ }
+resource ai 'Microsoft.Insights/components@2020-02-02' = { /* ... */ }
+```
+
+---
+
+## 17. Тестирование и качество
+
+| Раздел | Что внутри |
+|---|---|
+| 17 | Пирамида тестов, перф и модерация |
+
+- Unit/интеграционные тесты (WebApplicationFactory), контракты API (Swagger + tests), миграции EF.
+- Нагрузочные: K6/Azure Load Testing для загрузок/поиска.
+- Тесты модерации/безопасности (эдж‑кейсы контента), хаос‑тесты очередей/функций.
+
+---
+
+## 18. Roadmap (по этапам)
+
+| Раздел | Что внутри |
+|---|---|
+| 18 | A: Шкаф + сеты → B: Соц + торг → C: 3D + умный подбор |
+
+- **Этап A:** профили/аватар, добавление вещей (фото→сегментация→теги), 2D‑конструктор сетов, лента, поиск/фильтры.
+- **Этап B:** публичность/приватность, «Хочу купить» + чат (ACS), модерация, (позже) платежи/escrow.
+- **Этап C:** 3D‑аватар/вьюер, рекомендации (контент‑бэйзд + коллаборативка), AR‑примерка (аксессуары/обувь).
+
+---
+
+## 19. Мини‑бэклог (первые 2 спринта)
+
+| Раздел | Что внутри |
+|---|---|
+| 19 | Технические задачи |
+
+1. API‑каркас (.NET 8) + EF Core + миграции + Swagger.
+2. Загрузка в Blob (SAS) + Event Grid + Function «ProcessGarment» (заглушки сегментации/тегов/эмбеддингов).
+3. Модели/экраны RN/Web: добавление вещи, профиль/аватар, 2D‑конструктор сетов.
+4. Лента публичных сетов, лайк/сейв, фильтры/поиск.
+5. «Хочу купить» (BuyRequest) + чат на ACS.
+6. Application Insights: события, базовые дашборды (ретеншен/воронки).
+7. Модерация v1 (Content Safety), жалобы/скрытие.
+
+---
+
+## 20. Глоссарий (пояснения)
+
+| Термин | Пояснение |
+|---|---|
+| JTBD | Jobs‑To‑Be‑Done: подход «какую работу пользователь нанимает продукт сделать». |
+| MVP | Minimum Viable Product: минимальный набор функций для проверки ценности на рынке. |
+| SMPL | Параметрическая 3D‑модель человеческого тела, удобная для подгонки позы/формы. |
+| CPW | Cost‑per‑Wear: «стоимость одной носки» = цена / кол‑во носок. |
+| KYC | Know‑Your‑Customer: верификация личности при финоперациях (борьба с мошенничеством). |
+| Entra External ID | CIAM‑платформа Microsoft для логина потребителей (бывш. Azure AD B2C). |
+| Azure Communication Services (ACS) | Сервис общения: чат/вызовы/сообщения для мобильных и веб‑приложений. |
+| Event Grid | Событийная шина Azure (BlobCreated и др.) для триггеров функций и интеграций. |
+| Blob SAS | Shared Access Signature: ограниченный по времени/правам URL для операций с Blob. |
+| Vector Search | Поиск по векторным эмбеддингам (похожесть картинок/текста). В Azure — AI Search или SQL Vector. |
+| HNSW | Алгоритм ANN‑поиска для векторов (Hierarchical Navigable Small World) — быстрый топ‑K похожих. |
+| Escrow | Схема «заморозки» платежа до подтверждения сделки обеими сторонами. |
+
+---
+
+## 21. Приложения
+
+| Раздел | Что внутри |
+|---|---|
+| 21 | Примеры кода и конфигураций |
+
+**SAS‑эндпоинт (получение URL на загрузку):**
+```csharp
+public record UploadSas(string Url, DateTimeOffset ExpiresAt);
+
+app.MapPost("/api/uploads/sas", async (BlobServiceClient svc) =>
+{
+    var container = svc.GetBlobContainerClient("garments");
+    await container.CreateIfNotExistsAsync();
+    var name = $"{Guid.NewGuid()}.jpg";
+    var blob = container.GetBlobClient($"incoming/{name}");
+
+    var sas = blob.GenerateSasUri(Azure.Storage.Sas.BlobSasPermissions.Create | Azure.Storage.Sas.BlobSasPermissions.Write,
+                                  DateTimeOffset.UtcNow.AddMinutes(15));
+    return new UploadSas(sas.ToString(), DateTimeOffset.UtcNow.AddMinutes(15));
+});
+```
+
+**Поиск похожих вещей (Azure SQL Vector, при наличии):**
+```csharp
+app.MapGet("/api/garments/{id:guid}/similar", async (Guid id, AppDb db) =>
+{
+    var vec = await db.Garments.Where(g => g.Id == id).Select(g => g.FeaturesVec).FirstOrDefaultAsync();
+    if (vec == null) return Results.NotFound();
+
+    // Cosine distance по нативному типу VECTOR
+    var results = await db.Garments
+        .FromSqlRaw("""
+DECLARE @q VECTOR(384) = {0};
+SELECT TOP (10) * FROM Garments WHERE Id <> {1}
+ORDER BY VECTOR_DISTANCE('cosine', @q, FeaturesVec)
+""", vec, id)
+        .ToListAsync();
+    return results;
+});
+```
+
+**Рекомендер (эскиз сервиса):**
+```csharp
+public interface IRecommender
+{
+    Task<IEnumerable<Guid>> RecommendOutfitsAsync(Guid userId, int take = 20);
+}
+
+public class SimpleRecommender : IRecommender
+{
+    private readonly AppDb _db;
+    public SimpleRecommender(AppDb db) { _db = db; }
+
+    public async Task<IEnumerable<Guid>> RecommendOutfitsAsync(Guid userId, int take = 20)
+    {
+        // Микс: трендовые публичные + совместимость по цветам/сезону + недавние интересы
+        var outfits = await _db.Outfits
+            .Where(o => o.Visibility == Visibility.Public)
+            .OrderByDescending(o => o.Likes + o.Saves)
+            .Take(take)
+            .Select(o => o.Id)
+            .ToListAsync();
+        return outfits;
+    }
+}
+```
+
+**Telemetry (пример событий):**
+```csharp
+var telemetry = app.Services.GetRequiredService<TelemetryClient>();
+void Track(string evt, object props) => telemetry.TrackEvent(evt, props as IDictionary<string, string>);
+
+Track("AddedGarment", new Dictionary<string,string>{{"category","Top"}});
+Track("CreatedOutfit", new Dictionary<string,string>{{"items","3"}});
+```
+
+---
+
+**Готово.** Документ охватывает MVP без тяжёлого 3D, дорожную карту к 3D, доменную модель и API под Azure/.NET 8/EF, поиск и рекомендации (AI Search/SQL Vector), пайплайны обработки, безопасность и DevOps. 
+Все термины пояснены, включены метрики и стартовый бэклог.
+
+Сгенерировано: 2025-08-23T18:37:15.095309Z

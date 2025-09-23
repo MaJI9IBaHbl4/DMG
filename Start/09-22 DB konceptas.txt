@@ -1,0 +1,105 @@
+Phia - pasidometi del pirkimu
+
+
+Reikia prideti brandus i duombaze:
+Koks brandas
+Kuom uzsiima brandas (tik virsutiniai rubai, tik aksesuarai, gal but viskas???)
+
+=========================================================
+Ideja: spintos tvarka (AI tau pasako, kaip tau susandeliuoti rubus)
+=========================================================
+
+==Rubas==
+
+2 nuotaukos (Front and Back)
+3D vaizdas ???
+Medziaga (AI, ar tamposi, medziagos sudetis)
+Fitas (aptemptas (neteptas), neaptemptas)
+Spalva (AI)
+
+
+=========================================================
+
+==Kategorijos==
+
+1. Virsutinis
+	Palaidines | D20, M20, G20
+		Marskiniai | 
+		Marskineliai |
+		Daiva surasys 😊
+	Sijonas | D3 , M3 , G0
+		Mini
+		Midi
+		Maxi
+	Kelnes | D15, M15, G15
+		Dzinsai
+			Aukstas juosmuo
+			Zemas juosmuo
+			Vidutinis juosmuo
+			Platus
+			Siauri
+			Tiesus
+			Platejantis
+			Barrel
+		Kostiumines kelnes
+			Platus
+			Siauri
+			Tiesus
+			Platejantis
+		Shortai
+			Bermudai
+			Trumpi
+		Sijonshor4iai
+			
+	Sukneles | D8 M20 G0
+		Midi
+		Mini
+		Maxi
+		Progines
+		Klasikines
+		Laisvalaikio
+	Swarcai | D8, M8, G0
+		Iliemenuoti
+		Laisvi
+		Vyriski
+		
+2. Apatiniai (bet cia ne apatiniai)
+	*apgavloti, del kategoriju pasiemimo is "Virsutinis"*
+	
+3. Lauko drabuziai | D8, M4, M3
+	Striukes
+		=SEZONAS
+		Ilgas
+		Trumpas
+		
+	Paltas
+		=SEZONAS
+		Ilgas
+		Trumpas
+		
+	Kailiniai
+		=SEZONAS
+		Ilgas
+		Trumpas
+		
+	
+	
+4. Batai | D30, M20, G2m
+	Laisvalaikio
+		=SEZONAS
+	Aukstakulniai
+		Official
+		Ne official
+	Ilgaauliai
+		=SEZONAS
+		
+5. Aksesuarai | D40, M50, G5
+	Galvos
+	Salikai
+	Pirstines
+	Papuosalai
+	Rankines
+
+6. Sezonas (visi sezonai, vasara, ziema, slapia, sausa, pagalvosiu)
+
+=========================================================

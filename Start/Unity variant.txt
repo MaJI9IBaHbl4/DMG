@@ -1,0 +1,220 @@
+Картина целиком (кто за что отвечает)
+
+Unity-клиент: аватар, примерка, конструктор сетов (2D/3D), рендер превью, кэш ассетов.
+
+Бэкенд (Azure + EF/.NET 8, v3-схема): пользователи, аватар-параметры, гардеробы/вещи/луки, соц-сигналы, обмен/чат.
+
+3D-контент: Unity Addressables + CDN/CCD. В БД храним только ключи ассетов/версии/совместимость, сами меши/текстуры едет через CDN.
+
+Что добавить к v3 для 3D (без «ломки»)
+
+Ничего из v3 не меняем — только аддитивные таблицы (или JSON-поля), которые Unity понимает.
+
+1) Каталоги 3D-контента
+-- Новый справочник: какие 3D-ассеты вообще есть (и под какой риг)
+CREATE TABLE asset_catalog (
+  id UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID() PRIMARY KEY,
+  so_key NVARCHAR(128) NOT NULL,            -- Addressables key/label
+  type VARCHAR(16) NOT NULL,                -- 'avatar_rig'|'garment'|'pose'|'matset'|'physics'
+  rig_type VARCHAR(16) NULL,                -- 'UMA'|'RPM'|'CustomHumanoid'
+  slot VARCHAR(24) NULL,                    -- Top|Bottom|Dress|Shoes|Acc...
+  coverage_mask INT NULL,                   -- битовая маска скрытий слотов
+  exclusion_mask INT NULL,                  -- несовместимые слоты
+  lod_group TINYINT NULL,                   -- 0..3
+  meta JSON NULL,                           -- любые доп. параметры (JSON)
+  created_at DATETIME2 NOT NULL DEFAULT sysutcdatetime()
+);
+CREATE UNIQUE INDEX UX_asset_catalog_key ON asset_catalog(so_key);
+
+2) Ссылки из вещей/луков на ассеты
+
+В вашей garments ничего не меняем. Добавляем таблицу соответствий «вещь → ассет(ы)»:
+
+CREATE TABLE garment_assets (
+  garment_id UNIQUEIDENTIFIER NOT NULL REFERENCES garments(id) ON DELETE CASCADE,
+  asset_id UNIQUEIDENTIFIER NOT NULL REFERENCES asset_catalog(id),
+  material_variant NVARCHAR(32) NULL,
+  tint_hex CHAR(7) NULL,                    -- #RRGGBB
+  PRIMARY KEY (garment_id, asset_id)
+);
+
+
+В outfit_items можете добавить nullable-поля для 3D-позиций (необязательно, можно хранить в JSON):
+
+ALTER TABLE outfit_items ADD
+  x3d REAL NULL, y3d REAL NULL, z3d REAL NULL,
+  rx REAL NULL, ry REAL NULL, rz REAL NULL, scale3d REAL NULL;
+
+3) Аватар: рецепт (ДНК) и риг
+
+В avatars добавляем JSON-поле recipe_json (для UMA DNA / RPM blendshapes / ваших мерок).
+
+ALTER TABLE avatars ADD
+  rig_type VARCHAR(16) NULL,       -- UMA|RPM|CustomHumanoid
+  rig_asset_id UNIQUEIDENTIFIER NULL REFERENCES asset_catalog(id),
+  recipe_json NVARCHAR(MAX) NULL;  -- сериализованный рецепт (рост/вес/блендшейпы)
+
+
+Важно: старый клиент спокойно игнорирует новые поля; Unity-клиент использует их для сборки 3D.
+
+Unity: структура данных и кода
+ScriptableObject’ы (редактируются дизайнерами)
+// SO для одежды
+[CreateAssetMenu(menuName="Wardrobe/SO_Garment")]
+public class SO_Garment : ScriptableObject {
+    public string AssetKey;                // Addressables ключ префаба (SkinnedMeshRenderer)
+    public string Slot;                    // Top/Bottom/Dress/Shoes/Acc
+    public string RigType;                 // UMA/RPM/CustomHumanoid
+    public int CoverageMask;               // битовая маска скрытий
+    public int ExclusionMask;              // взаимоисключения
+    public string[] MaterialVariants;
+    public int LodGroup = 0;
+    public string PhysicsProfileKey;       // Cloth/Obi/Magica preset
+    public string[] ColorTags;
+    public string[] StyleTags;
+}
+
+// SO для рига аватара
+[CreateAssetMenu(menuName="Wardrobe/SO_AvatarRig")]
+public class SO_AvatarRig : ScriptableObject {
+    public string AssetKey;                // префаб с Humanoid Animator + кости
+    public string RigType;                 // UMA/RPM/CustomHumanoid
+    public TextAsset DefaultRecipeJson;    // дефолт ДНК (JSON)
+    public string[] HiddenSlotsByDefault;  // например, BaseTorso когда надет Top
+}
+
+Загрузчик ассетов и эквип
+public sealed class AddressableLoader {
+    public async Task<GameObject> LoadPrefabAsync(string key) =>
+        await UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<GameObject>(key).Task;
+}
+
+public sealed class AvatarAssembler : MonoBehaviour {
+    [SerializeField] Transform _avatarRoot;
+    GameObject _avatarInstance;
+    readonly Dictionary<string, GameObject> _equipped = new();
+
+    public async Task<GameObject> SpawnAvatarAsync(SO_AvatarRig rig, string recipeJson) {
+        _avatarInstance = await new AddressableLoader().LoadPrefabAsync(rig.AssetKey);
+        _avatarInstance = Instantiate(_avatarInstance, _avatarRoot);
+        ApplyRecipe(_avatarInstance, recipeJson); // рост/вес/блендшейпы/скейлы
+        return _avatarInstance;
+    }
+
+    public async Task EquipAsync(SO_Garment g, string materialVariant = null, Color? tint = null) {
+        if (!IsCompatible(g)) return;
+        var prefab = await new AddressableLoader().LoadPrefabAsync(g.AssetKey);
+        var go = Instantiate(prefab, _avatarInstance.transform);
+        // Ищем SkinnedMeshRenderer и переназначаем кости на кости аватара:
+        var smr = go.GetComponentInChildren<SkinnedMeshRenderer>(true);
+        var avatarBones = _avatarInstance.GetComponentsInChildren<Transform>(true)
+                                         .ToDictionary(t => t.name, t => t);
+        smr.bones = smr.bones.Select(b => avatarBones[b.name]).ToArray();
+        // Материал/тинт:
+        if (materialVariant != null) SelectSubMaterial(smr, materialVariant);
+        if (tint.HasValue) foreach (var m in smr.materials) m.color = tint.Value;
+        ResolveCoverageAndExclusions(g);
+        _equipped[g.Slot] = go;
+    }
+
+    public void Unequip(string slot) {
+        if (_equipped.TryGetValue(slot, out var go)) Destroy(go);
+        _equipped.Remove(slot);
+    }
+
+    bool IsCompatible(SO_Garment g) => /* проверка RigType, маски и занятых слотов */;
+    void ResolveCoverageAndExclusions(SO_Garment g){ /* скрыть слоты, применить маски */ }
+    void ApplyRecipe(GameObject avatar, string recipeJson){ /* UMA DNA / RPM blendshapes / Custom */ }
+}
+
+Сохранение/загрузка лука
+[Serializable]
+public struct OutfitItemDto {
+    public Guid OwnedGarmentId;
+    public string AssetKey;         // дублируем для клиента, маппится на garment_assets
+    public string MaterialVariant;
+    public string TintHex;
+    public string Slot;
+    public float? X3D, Y3D, Z3D, RX, RY, RZ, Scale3D;
+}
+
+[Serializable]
+public struct OutfitDto {
+    public Guid OutfitId;
+    public string Title;
+    public string Note;
+    public string Visibility;       // private|public
+    public OutfitItemDto[] Items;
+}
+
+Этапность (Unity-работы под ваши 1→2→3)
+Этап 1 — Аватар/гардероб/вещи/добавление
+
+Бэкенд: v3 как есть + asset_catalog, garment_assets, JSON-поля avatars.recipe_json/rig_type/rig_asset_id.
+Unity:
+
+Сцены: WardrobeScene (список вещей), AvatarScene (настройки тела), OutfitEditor (2D/3D).
+
+Риг: выберите один (быстро — Ready Player Me, гибко — UMA, свой — Custom Humanoid). Храним rig_type в БД.
+
+Адресуемость: все меши/материалы — Addressables; ассеты описаны в SO_Garment/SO_AvatarRig.
+
+Превью/скриншоты: сервис рендера в квадрат 1024 (иконка карточки вещи/лука).
+
+Перф-бюджеты: LODGroup, лимиты вершин/текстур для мобильных, опция «перейти в 2D» для слабых девайсов.
+
+Этап 2 — Лента/профили/лайки
+
+Бэкенд: добавляем (как в v3) outfits/*, follows, user_outfit_reactions, представления для фида.
+Unity:
+
+Сцены: FeedScene, ProfileScene.
+
+Кэш превью сетов (адресуемые картинки) + lazy-подгрузка 3D при входе в «примерку».
+
+Лайки/сейвы — простые POST в API; счётчики в ответах фида.
+
+Этап 3 — Обмен/чат/внутренняя перепродажа
+
+Бэкенд: listings, interests, interest_messages, peer_reviews (как в v3).
+Unity:
+
+Сцена TradeChatScene (тред интереса).
+
+Для обмена — выбор вещей из OwnedGarments; UI отправки оффера/контроофера.
+
+Платежей нет (ре-хоуминг) — только статус-флоу и репутация.
+
+Все переходы — аддитивные: старый клиент не знает про новые таблицы/поля и живёт на своей функциональности.
+
+Контракты между Unity и бэкендом (минимум)
+
+GET /me/avatar → { rigType, rigAssetKey, recipeJson }
+
+GET /me/wardrobes → список гардеробов
+
+GET /wardrobes/{id}/garments → { garmentId, title, soKey, materialVariant, tintHex, slot }[]
+
+POST /outfits (создать/обновить) → хранит 3D-трансформы/позу
+
+GET /feed/public → карточки сетов + превью
+
+POST /listings / POST /interests / POST /messages
+
+Производительность и пайплайн контента
+
+Addressables + CDN/CCD — постройка «каталога» без релиза клиента; ключи/версии в asset_catalog.
+
+LOD/текстуры: 3 уровня LOD, текстуры ≤ 2K на мобилках; Atlasing, GPU Instancing.
+
+Cloth: обёртка-интерфейс (IClothBackend) → легко сменить Unity Cloth на Obi/Magica при необходимости.
+
+Валидация ассетов (editor tooling): слоты, rigType, coverage/exclusion, лимиты вершин/материалов — авто-чек перед публикацией.
+
+Риски и решения
+
+Несовместимость одежды ↔ риг → в каталоге хранить rig_type; для custom-рига придерживаться Humanoid и одинаковых имён костей (см. пример переназначения bones).
+
+Тяжёлые ассеты → LOD, выключаем Cloth на слабых девайсах, «Lite Mode» (2D-спрайты в редакторе).
+
+Сложность пайплайна → чёткое разделение: БД = данные/ключи, Unity = ассеты/логика экипировки.

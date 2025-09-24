@@ -1,0 +1,53 @@
+my-app/
+├── app/
+│   ├── _layout.tsx          # Главный layout (навигация, провайдеры)
+│   ├── index.tsx            # Главный экран (/)
+│   │
+│   ├── profile/
+│   │   ├── _layout.tsx      # Stack для профиля
+│   │   ├── index.tsx        # /profile
+│   │   └── edit.tsx         # /profile/edit
+│   │
+│   ├── wardrobe/
+│   │   ├── _layout.tsx      # Stack или Tabs для гардероба
+│   │   ├── index.tsx        # /wardrobe
+│   │   ├── [id].tsx         # /wardrobe/123
+│   │   └── edit.tsx         # /wardrobe/edit
+│   │
+│   └── auth/
+│       ├── _layout.tsx      # Stack для логина/регистрации
+│       ├── login.tsx        # /auth/login
+│       └── register.tsx     # /auth/register
+│
+├── components/               # Переиспользуемые UI-компоненты
+│   ├── ui/                   # базовые (Button, Input, Card…)
+│   └── wardrobe/             # специфичные для гардероба (ItemCard, OutfitGrid…)
+│
+├── constants/                # Константы (цвета, размеры, enum-ы)
+│   └── theme.ts
+│
+├── hooks/                    # Кастомные хуки (useAuth, useWardrobe)
+│   └── useAuth.ts
+│
+├── lib/                      # Вспомогательные библиотеки
+│   ├── api.ts                # fetch/axios клиент
+│   ├── storage.ts            # AsyncStorage, secure store
+│   └── auth.ts               # логика работы с JWT / Azure AD
+│
+├── providers/                # React Context Providers
+│   └── AuthProvider.tsx
+│
+├── types/                    # Общие типы TS
+│   ├── wardrobe.ts
+│   └── user.ts
+│
+├── assets/                   # Изображения, иконки, шрифты
+│   └── logo.png
+│
+├── scripts/                  # Утилитарные скрипты (reset-project.js и пр.)
+│
+├── app.json
+├── babel.config.js
+├── tsconfig.json
+├── package.json
+└── README.md

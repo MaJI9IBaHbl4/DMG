@@ -86,7 +86,10 @@ git remote add origin https://github.com/<user>/<repo>.git   # или git@github
 # (Добавь .gitignore, .gitattributes)
 git add .
 git commit -m "Первый коммит"
+
 git push                                                     # благодаря push.autoSetupRemote true
+	OR
+git push --set-upstream origin master
 
 # Если push потребует авторизацию:
 # - HTTPS: введи PAT (см. п.2)

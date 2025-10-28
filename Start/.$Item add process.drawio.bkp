@@ -1,0 +1,147 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/25.0.2 Chrome/128.0.6613.186 Electron/32.2.5 Safari/537.36" version="25.0.2">
+  <diagram name="Страница — 1" id="dB4ObCp7RLnt6SvgULNx">
+    <mxGraphModel dx="2731" dy="2653" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-22" value="Mobile program" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="10" y="530" width="160" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-23" value="" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="170" y="530" width="1820" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-11" value="Azure blob" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="10" y="-100" width="160" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-12" value="" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="170" y="-100" width="1820" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-1" value="Backend server" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="10" y="110.00000000000001" width="160" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-3" value="SQL server" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="10" y="320" width="160" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-4" value="Vertext AI" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="10" y="-310" width="160" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-5" value="" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="170" y="-310" width="1820" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-6" value="" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="170" y="320" width="1820" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-7" value="" style="rounded=0;whiteSpace=wrap;html=1;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="170" y="110.00000000000001" width="1820" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-8" target="gSxpunGTnwzcW9Oz3Z1n-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-8" value="Vartotojas prideda nauja ruba supildant parametrus ir prideda nuotrauka" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="590" width="235" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-9" target="gSxpunGTnwzcW9Oz3Z1n-24">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="240" />
+              <mxPoint x="940" y="375" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-58" value="2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="gSxpunGTnwzcW9Oz3Z1n-29">
+          <mxGeometry x="-0.8704" y="3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-9" target="gSxpunGTnwzcW9Oz3Z1n-13">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="860" y="190" />
+              <mxPoint x="860" y="-205" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-56" value="3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="gSxpunGTnwzcW9Oz3Z1n-54">
+          <mxGeometry x="-0.9524" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-9" target="gSxpunGTnwzcW9Oz3Z1n-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-57" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="gSxpunGTnwzcW9Oz3Z1n-55">
+          <mxGeometry x="-0.9043" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-9" value="Gaunam item&#39;o informacija ir:&amp;nbsp;&lt;div&gt;1. Nuotraukos originala siunciam i azure blob saugykla.&lt;/div&gt;&lt;div&gt;2. Issaugom item&#39;a SQL serveryje su parametrais, linka i azure blob&#39;a&lt;/div&gt;&lt;div&gt;&lt;div&gt;3. Siunciam i vertex, kad pasalintu fona&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="165" width="230" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-13" target="gSxpunGTnwzcW9Oz3Z1n-39">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1560" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-13" value="Apdoruoja foto pasalinus fona" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="975" y="-255" width="210" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-16" target="gSxpunGTnwzcW9Oz3Z1n-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-16" value="Issaugoma originalia nuotrauku saugykloj ir generuojamas linkas i ja" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="975" y="-45" width="210" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-19" target="gSxpunGTnwzcW9Oz3Z1n-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-19" value="Patvirtinus duomenys siunciami i serveri" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="590" width="215" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-24" value="Issaugomas itemas duombazes lentelej su parametrais" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="850" y="375" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-25" target="gSxpunGTnwzcW9Oz3Z1n-31">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-25" value="Gaunam issaugotos originalios nuotraukos linka ir siunciam i SQL serveri" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="165.00000000000003" width="130" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-31" value="Prie item&#39;o pridedam originalios nuotraukos linka&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="1152.5" y="375" width="145" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-39" target="gSxpunGTnwzcW9Oz3Z1n-40">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-39" value="Gaunam nuotrauka be fono ir siunciam i azure blob, kad issaugoti" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="1480" y="165.00000000000003" width="130" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-40" target="gSxpunGTnwzcW9Oz3Z1n-43">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1730" y="894.2857142857143" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-40" value="Issaugoma nuotrauka be fono saugykloj ir generuojamas linkas i ja" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="1630" y="-45" width="130" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-45" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" edge="1" parent="1" source="gSxpunGTnwzcW9Oz3Z1n-43" target="gSxpunGTnwzcW9Oz3Z1n-44">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-43" value="Gaunam issaugotos nuotraukos be fono linka ir siunciam i SQL serveri" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="1730" y="165.00000000000003" width="130" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-44" value="Prie item&#39;o pridedam originalios nuotraukos linka&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;align=left;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="1735" y="410" width="120" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-51" value="Servisas" style="rounded=0;whiteSpace=wrap;html=1;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;fontSize=35;fontStyle=1;fillColor=#B20000;strokeColor=#B20000;fontColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="10" y="-380" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-52" value="Procesas" style="rounded=0;whiteSpace=wrap;html=1;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;fontSize=35;fontStyle=1;fillColor=#B20000;strokeColor=#B20000;fontColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="170" y="-380" width="1820" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="gSxpunGTnwzcW9Oz3Z1n-53" value="&lt;font color=&quot;#ffffff&quot; style=&quot;font-size: 50px;&quot;&gt;Item&#39;o issaugojimo procesas&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#800000;strokeColor=#23445d;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" vertex="1" parent="1">
+          <mxGeometry x="10" y="-480" width="1980" height="100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

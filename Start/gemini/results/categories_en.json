@@ -1,0 +1,96 @@
+{
+  "top": [
+    "t_shirt",
+    "polo_shirt",
+    "shirt_buttoned",
+    "blouse",
+    "tank_top",
+    "longsleeve",
+    "sweatshirt",
+    "hoodie",
+    "sweater_knit",
+    "cardigan",
+    "vest_top",
+    "crop_top",
+    "bodysuit_top"
+  ],
+  "bottom": [
+    "jeans",
+    "pants_chinos",
+    "trousers_tailored",
+    "shorts",
+    "skirt_mini",
+    "skirt_midi",
+    "skirt_maxi",
+    "leggings",
+    "joggers",
+    "sweatpants"
+  ],
+  "dress_jumpsuit": [
+    "dress_mini",
+    "dress_midi",
+    "dress_maxi",
+    "jumpsuit_full",
+    "playsuit_romper"
+  ],
+  "outerwear": [
+    "jacket_light",
+    "denim_jacket",
+    "leather_jacket",
+    "coat",
+    "trench_coat",
+    "down_puffer",
+    "parka",
+    "blazer"
+  ],
+  "footwear": [
+    "sneakers",
+    "boots_ankle",
+    "boots_knee",
+    "loafers",
+    "heels",
+    "sandals",
+    "slippers"
+  ],
+  "accessory": [
+    "bag_tote",
+    "bag_crossbody",
+    "backpack",
+    "belt",
+    "scarf",
+    "hat_beanie",
+    "cap_baseball",
+    "gloves"
+  ],
+  "underwear_sleep": [
+    "bra",
+    "panties",
+    "boxers_briefs",
+    "socks",
+    "tights",
+    "pajama_set",
+    "robe"
+  ],
+  "sports_swim": [
+    "sports_top",
+    "sports_leggings",
+    "tracksuit_top",
+    "tracksuit_bottom",
+    "swimsuit_onepiece",
+    "bikini_top",
+    "bikini_bottom",
+    "swim_trunks"
+  ],
+  "sets": [
+    "suit_set",
+    "tracksuit_set",
+    "pajama_set_two_piece"
+  ],
+  "other": [
+    "costume",
+    "ethnic_traditional",
+    "workwear_uniform",
+    "maternity",
+    "other"
+  ]
+}

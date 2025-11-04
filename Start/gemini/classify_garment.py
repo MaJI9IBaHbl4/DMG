@@ -59,10 +59,16 @@ FINE_BY_COARSE: Dict[str, List[str]] = {
 ALL_FINE: List[str] = sorted({f for lst in FINE_BY_COARSE.values() for f in lst})
 FINE_TO_COARSE: Dict[str, str] = {f: c for c, lst in FINE_BY_COARSE.items() for f in lst}
 
+# =======================
 # Атрибуты
+# =======================
 PATTERN_ENUM = ["solid","striped","checked","floral","graphic","polka_dot","other"]
 SLEEVE_ENUM  = ["sleeveless","short","three_quarter","long","unknown"]
 NECKLINE_ENUM = ["crew","v_neck","scoop","turtleneck","polo","button_down","strapless","other"]
+
+# НОВОЕ: длина брюк и тип кромки
+PANT_LENGTH_ENUM = ["floor_sweeping", "full", "ankle", "cropped", "capri", "unknown"]
+HEM_FINISH_ENUM  = ["clean", "raw", "rolled_cuff", "elastic_cuff", "frayed", "other"]
 
 def must_file(p: str) -> str:
     path = Path(p)
@@ -84,6 +90,10 @@ def build_schema() -> Dict[str, Any]:
             "neckline":        {"type": "string", "enum": NECKLINE_ENUM},
             "material_guess":  {"type": "string"},
             "notes":           {"type": "string"},
+
+            # НОВОЕ: не обязательные поля
+            "pant_length":     {"type": "string", "enum": PANT_LENGTH_ENUM},
+            "hem_finish":      {"type": "string", "enum": HEM_FINISH_ENUM},
         },
     }
 
@@ -151,6 +161,17 @@ GLOSSARY = (
     "\n"
     "— SETS —\n"
     "* suit_set = blazer + trousers/skirt as one suit. tracksuit_set = tracksuit (top+bottom).\n"
+    "\n"
+    "— PANTS LENGTH —\n"
+    "* floor_sweeping = hem touches floor and pools.\n"
+    "* full = hem reaches shoe/heel (no ankle visible).\n"
+    "* ankle = ankle bone visible.\n"
+    "* cropped = several cm above ankle.\n"
+    "* capri = around mid-calf.\n"
+    "* unknown = hem not visible.\n"
+    "\n"
+    "— HEM FINISH —\n"
+    "* clean (finished), raw (cut edge), rolled_cuff (turn-ups), elastic_cuff, frayed (distressed), other.\n"
     "\n"
     "— EDGE CASES —\n"
     "* If fine is chosen but coarse does not match — coarse must follow the fine→coarse map.\n"
@@ -276,6 +297,8 @@ def main():
         "sleeve_length":   attrs.get("sleeve_length"),
         "neckline":        attrs.get("neckline"),
         "material_guess":  attrs.get("material_guess"),
+        "pant_length":     attrs.get("pant_length"),   # НОВОЕ
+        "hem_finish":      attrs.get("hem_finish"),    # НОВОЕ
         "notes":           attrs.get("notes"),
         "elapsed_seconds": elapsed,
     }

@@ -1,0 +1,14 @@
+{
+  "analysis_date": "2025-11-05",
+  "input_image_path": "C:\\DMG\\Start\\remover_resize\\results\\kurtka_no_bg.png",
+  "coarse_category": "outerwear",
+  "fine_category": "down_puffer",
+  "pattern": "solid",
+  "sleeve_length": "long",
+  "neckline": null,
+  "material_guess": "nylon/polyester",
+  "pant_length": null,
+  "hem_finish": "clean",
+  "notes": null,
+  "elapsed_seconds": 7.453
+}

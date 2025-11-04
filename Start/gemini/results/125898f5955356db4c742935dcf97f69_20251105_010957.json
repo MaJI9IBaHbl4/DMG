@@ -1,0 +1,14 @@
+{
+  "analysis_date": "2025-11-05",
+  "input_image_path": "\\\\maji9ibahbl4\\vertex\\125898f5955356db4c742935dcf97f69.avif",
+  "coarse_category": "bottom",
+  "fine_category": "trousers_tailored",
+  "pattern": "solid",
+  "sleeve_length": null,
+  "neckline": null,
+  "material_guess": "suiting fabric",
+  "pant_length": "full",
+  "hem_finish": "clean",
+  "notes": null,
+  "elapsed_seconds": 6.024
+}

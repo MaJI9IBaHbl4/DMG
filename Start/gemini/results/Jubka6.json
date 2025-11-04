@@ -1,0 +1,12 @@
+{
+  "analysis_date": "2025-11-05",
+  "input_image_path": "C:\\DMG\\Start\\Vertex AI test\\Jubka6.png",
+  "coarse_category": "underwear_sleep",
+  "fine_category": "robe",
+  "pattern": "solid",
+  "sleeve_length": "long",
+  "neckline": "v_neck",
+  "material_guess": "sheer fabric, feathers",
+  "notes": "Long, sheer robe with feather trim on sleeves and hem.",
+  "elapsed_seconds": 10.409
+}

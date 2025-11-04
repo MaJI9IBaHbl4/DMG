@@ -1,0 +1,12 @@
+{
+  "analysis_date": "2025-11-04",
+  "input_image_path": "\\\\maji9ibahbl4\\vertex\\rubaska.png",
+  "coarse_category": "top",
+  "fine_category": "shirt_buttoned",
+  "pattern": "solid",
+  "sleeve_length": "long",
+  "neckline": "button_down",
+  "material_guess": "cotton blend",
+  "notes": "Features two chest flap pockets.",
+  "elapsed_seconds": 6.551
+}

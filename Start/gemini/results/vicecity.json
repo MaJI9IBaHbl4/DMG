@@ -1,0 +1,12 @@
+{
+  "analysis_date": "2025-11-04",
+  "input_image_path": "\\\\maji9ibahbl4\\vertex\\vicecity.webp",
+  "coarse_category": "top",
+  "fine_category": "shirt_buttoned",
+  "pattern": "floral",
+  "sleeve_length": "short",
+  "neckline": "button_down",
+  "material_guess": "null",
+  "notes": "null",
+  "elapsed_seconds": 4.816
+}

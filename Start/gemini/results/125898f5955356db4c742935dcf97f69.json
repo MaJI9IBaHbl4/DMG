@@ -1,0 +1,12 @@
+{
+  "analysis_date": "2025-11-04",
+  "input_image_path": "\\\\maji9ibahbl4\\vertex\\125898f5955356db4c742935dcf97f69.avif",
+  "coarse_category": "bottom",
+  "fine_category": "trousers_tailored",
+  "pattern": "solid",
+  "sleeve_length": null,
+  "neckline": null,
+  "material_guess": "suiting fabric",
+  "notes": "Single front pleat, pressed creases.",
+  "elapsed_seconds": 7.798
+}

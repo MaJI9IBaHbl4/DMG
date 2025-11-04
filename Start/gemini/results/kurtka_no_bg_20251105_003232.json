@@ -1,0 +1,12 @@
+{
+  "analysis_date": "2025-11-05",
+  "input_image_path": "C:\\DMG\\Start\\remover_resize\\results\\kurtka_no_bg.png",
+  "coarse_category": "outerwear",
+  "fine_category": "down_puffer",
+  "pattern": "solid",
+  "sleeve_length": "long",
+  "neckline": "other",
+  "material_guess": "synthetic/down fill",
+  "notes": "Hooded puffer jacket",
+  "elapsed_seconds": 10.221
+}

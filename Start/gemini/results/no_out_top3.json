@@ -1,0 +1,12 @@
+{
+  "analysis_date": "2025-11-04",
+  "input_image_path": "\\\\maji9ibahbl4\\vertex\\no_out_top3.png",
+  "coarse_category": "top",
+  "fine_category": "sweatshirt",
+  "pattern": "solid",
+  "sleeve_length": "long",
+  "neckline": "crew",
+  "material_guess": "cotton blend / synthetic blend",
+  "notes": "The North Face logo on chest, textured sleeves",
+  "elapsed_seconds": 8.741
+}

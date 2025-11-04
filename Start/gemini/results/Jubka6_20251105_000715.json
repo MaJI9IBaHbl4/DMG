@@ -1,0 +1,12 @@
+{
+  "analysis_date": "2025-11-05",
+  "input_image_path": "C:\\DMG\\Start\\Vertex AI test\\Jubka6.png",
+  "coarse_category": "underwear_sleep",
+  "fine_category": "tights",
+  "pattern": "other",
+  "sleeve_length": "unknown",
+  "neckline": "other",
+  "material_guess": "net",
+  "notes": "fishnet tights",
+  "elapsed_seconds": 7.695
+}

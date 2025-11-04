@@ -1,0 +1,12 @@
+{
+  "analysis_date": "2025-11-04",
+  "input_image_path": "\\\\maji9ibahbl4\\vertex\\platie.avif",
+  "coarse_category": "dress_jumpsuit",
+  "fine_category": "dress_mini",
+  "pattern": "solid",
+  "sleeve_length": "long",
+  "neckline": "crew",
+  "material_guess": "knit",
+  "notes": "Ribbed knit top with a flared skirt bottom. Buttons on sleeve cuffs.",
+  "elapsed_seconds": 6.455
+}

@@ -1,0 +1,12 @@
+{
+  "analysis_date": "2025-11-04",
+  "input_image_path": "\\\\maji9ibahbl4\\vertex\\1.webp",
+  "coarse_category": "underwear_sleep",
+  "fine_category": "tights",
+  "pattern": "other",
+  "sleeve_length": "unknown",
+  "neckline": "other",
+  "material_guess": "mesh",
+  "notes": "fishnet pattern",
+  "elapsed_seconds": 5.534
+}

@@ -1,0 +1,14 @@
+{
+  "analysis_date": "2025-11-05",
+  "input_image_path": "\\\\maji9ibahbl4\\vertex\\top.avif",
+  "coarse_category": "outerwear",
+  "fine_category": "parka",
+  "pattern": "solid",
+  "sleeve_length": "long",
+  "neckline": "other",
+  "material_guess": null,
+  "pant_length": null,
+  "hem_finish": "clean",
+  "notes": null,
+  "elapsed_seconds": 12.188
+}

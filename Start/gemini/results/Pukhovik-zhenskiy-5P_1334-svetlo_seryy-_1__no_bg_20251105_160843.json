@@ -1,0 +1,14 @@
+{
+  "analysis_date": "2025-11-05",
+  "input_image_path": "C:\\DMG\\Start\\remover_resize\\results\\Pukhovik-zhenskiy-5P_1334-svetlo_seryy-_1__no_bg.png",
+  "coarse_category": "outerwear",
+  "fine_category": "down_puffer",
+  "pattern": "solid",
+  "sleeve_length": "long",
+  "neckline": "other",
+  "material_guess": "synthetic",
+  "pant_length": null,
+  "hem_finish": "clean",
+  "notes": "",
+  "elapsed_seconds": 12.936
+}

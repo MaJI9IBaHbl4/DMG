@@ -1,0 +1,14 @@
+{
+  "analysis_date": "2025-11-05",
+  "input_image_path": "\\\\maji9ibahbl4\\vertex\\platie.avif",
+  "coarse_category": "dress_jumpsuit",
+  "fine_category": "dress_mini",
+  "pattern": "solid",
+  "sleeve_length": "long",
+  "neckline": "crew",
+  "material_guess": "knit",
+  "pant_length": "unknown",
+  "hem_finish": "clean",
+  "notes": "",
+  "elapsed_seconds": 6.267
+}

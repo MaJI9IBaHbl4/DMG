@@ -1,0 +1,14 @@
+{
+  "analysis_date": "2025-11-05",
+  "input_image_path": "C:\\DMG\\Start\\remover_resize\\results\\20251008_100923_no_bg.png",
+  "coarse_category": "outerwear",
+  "fine_category": "blazer",
+  "pattern": "striped",
+  "sleeve_length": "long",
+  "neckline": "other",
+  "material_guess": "suiting fabric",
+  "pant_length": "unknown",
+  "hem_finish": "clean",
+  "notes": "Pinstriped blazer.",
+  "elapsed_seconds": 12.173
+}

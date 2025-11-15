@@ -1,0 +1,14 @@
+{
+  "analysis_date": "2025-11-08",
+  "input_image_path": "C:\\DMG\\Start\\remover_resize\\results\\20251008_100923_no_bg.png",
+  "coarse_category": "outerwear",
+  "fine_category": "blazer",
+  "pattern": "striped",
+  "sleeve_length": "long",
+  "neckline": "other",
+  "material_guess": "suiting fabric",
+  "pant_length": null,
+  "hem_finish": null,
+  "notes": null,
+  "elapsed_seconds": 7.68
+}
